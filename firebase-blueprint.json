@@ -1,0 +1,127 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Hunter character stats, level, XP, and personal transformation targets",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner UID" },
+        "name": { "type": "string", "description": "Hunter name" },
+        "email": { "type": "string", "description": "User email address" },
+        "title": { "type": "string", "description": "Hunter rank title" },
+        "rankTier": { "type": "string", "description": "Rank category code (e.g. E-Rank, D-Rank, S-Rank)" },
+        "level": { "type": "integer", "description": "Current player level" },
+        "currentXp": { "type": "integer", "description": "Current accumulated XP" },
+        "xpToNextLevel": { "type": "integer", "description": "XP threshold required for level advancement" },
+        "currentChallengeDay": { "type": "integer", "description": "Active day index (1 to 30)" },
+        "streakDays": { "type": "integer", "description": "Consecutive days active streak" },
+        "dailyWaterTargetMl": { "type": "integer", "description": "Target water intake in ml" },
+        "dailyStepTarget": { "type": "integer", "description": "Target daily step count" },
+        "dailyKmTarget": { "type": "number", "description": "Target daily distance in km" },
+        "startDate": { "type": "string", "description": "Date challenge initiated" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp via serverTimestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Update timestamp via serverTimestamp" }
+      },
+      "required": ["userId", "name", "level", "currentXp", "currentChallengeDay"]
+    },
+    "UserMission": {
+      "title": "UserMission",
+      "description": "30-day mission progress record for a user",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Mission identifier" },
+        "day": { "type": "integer", "description": "Day index (1 to 30)" },
+        "title": { "type": "string", "description": "Mission title" },
+        "description": { "type": "string", "description": "Mission description" },
+        "category": { "type": "string", "description": "Mission category" },
+        "xpReward": { "type": "integer", "description": "XP rewarded on completion" },
+        "isCompleted": { "type": "boolean", "description": "Completion state" },
+        "completedAt": { "type": "integer", "description": "Epoch timestamp in ms if finished" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Update timestamp via serverTimestamp" }
+      },
+      "required": ["id", "day", "title", "category", "xpReward", "isCompleted"]
+    },
+    "UserStride": {
+      "title": "UserStride",
+      "description": "Walking or running distance activity record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique activity ID" },
+        "date": { "type": "string", "description": "Date of activity" },
+        "activityType": { "type": "string", "description": "Walking or Running" },
+        "distanceKm": { "type": "number", "description": "Distance covered in kilometres" },
+        "durationMinutes": { "type": "integer", "description": "Duration in minutes" },
+        "steps": { "type": "integer", "description": "Number of steps taken" },
+        "notes": { "type": "string", "description": "Optional notes" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" }
+      },
+      "required": ["id", "activityType", "distanceKm", "durationMinutes", "steps"]
+    },
+    "UserWorkout": {
+      "title": "UserWorkout",
+      "description": "Completed workout summary record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Workout record ID" },
+        "summary": { "type": "string", "description": "Summary string of completed workout" },
+        "completedAt": { "type": "string", "format": "date-time", "description": "Completion timestamp" }
+      },
+      "required": ["id", "summary"]
+    },
+    "UserNutrition": {
+      "title": "UserNutrition",
+      "description": "Daily nutrition and water log entry",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string", "description": "Log date label" },
+        "waterMl": { "type": "integer", "description": "Total water intake in ml" },
+        "notes": { "type": "string", "description": "Nutrition notes" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Update timestamp" }
+      },
+      "required": ["date", "waterMl"]
+    },
+    "UserMind": {
+      "title": "UserMind",
+      "description": "Daily mental strength, focus, confidence, and reflection log",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string", "description": "Date label" },
+        "mood": { "type": "string", "description": "Mood state" },
+        "focusScore": { "type": "integer", "description": "Focus level from 1 to 10" },
+        "confidenceScore": { "type": "integer", "description": "Confidence level from 1 to 10" },
+        "meditationMinutes": { "type": "integer", "description": "Meditation duration in minutes" },
+        "readingPages": { "type": "integer", "description": "Pages read" },
+        "journalText": { "type": "string", "description": "Journal entry" },
+        "reflectionText": { "type": "string", "description": "Daily reflection entry" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Update timestamp" }
+      },
+      "required": ["date", "mood", "focusScore", "confidenceScore"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Root user profile document"
+    },
+    "/users/{userId}/missions/{missionId}": {
+      "schema": { "$ref": "#/entities/UserMission" },
+      "description": "User daily transformation missions"
+    },
+    "/users/{userId}/strides/{strideId}": {
+      "schema": { "$ref": "#/entities/UserStride" },
+      "description": "Walking and running session logs"
+    },
+    "/users/{userId}/workouts/{workoutId}": {
+      "schema": { "$ref": "#/entities/UserWorkout" },
+      "description": "Completed workout session records"
+    },
+    "/users/{userId}/nutrition/{nutritionId}": {
+      "schema": { "$ref": "#/entities/UserNutrition" },
+      "description": "Daily nutrition and hydration records"
+    },
+    "/users/{userId}/mind/{mindId}": {
+      "schema": { "$ref": "#/entities/UserMind" },
+      "description": "Daily mental strength and reflection logs"
+    }
+  }
+}

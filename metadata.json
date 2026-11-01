@@ -1,0 +1,6 @@
+{
+  "name": "reborn",
+  "description": "REBUILD YOURSELF. LEVEL UP YOUR LIFE. Gamified transformation app with 30-day missions, RPG leveling, fitness, nutrition, and mental strength.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
