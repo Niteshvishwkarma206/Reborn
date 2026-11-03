@@ -4,14 +4,11 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -23,12 +20,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.AchievementBadge
 import com.example.data.model.UserProfile
-import com.example.ui.components.CyberCard
 import com.example.ui.components.RebornTopHeader
 import com.example.ui.theme.*
 import com.example.ui.viewmodel.RebornViewModel
@@ -37,223 +34,258 @@ import com.example.ui.viewmodel.RebornViewModel
 fun SettingsScreen(
   viewModel: RebornViewModel,
   user: UserProfile,
-  badges: List<AchievementBadge>
+  badges: List<AchievementBadge> = emptyList()
 ) {
   val context = LocalContext.current
   var showResetDialog by remember { mutableStateOf(false) }
   var showExportDialog by remember { mutableStateOf(false) }
-  var exportFormat by remember { mutableStateOf("JSON") }
+  var showTargetsDialog by remember { mutableStateOf(false) }
 
   LazyColumn(
     modifier = Modifier
       .fillMaxSize()
-      .background(CyberBackground),
-    contentPadding = PaddingValues(bottom = 90.dp)
+      .background(CleanBackground)
+      .testTag("profile_screen"),
+    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 96.dp),
+    verticalArrangement = Arrangement.spacedBy(14.dp)
   ) {
     item {
       RebornTopHeader(
-        title = "COMMAND & SETTINGS",
-        subtitle = "IDENTITY, TARGETS & ACHIEVEMENTS"
+        title = "Profile & Settings",
+        subtitle = "Account targets, data export & management"
       )
     }
 
-    // Hunter Profile Card
+    // User Profile Card
     item {
-      CyberCard(
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-        borderColor = NeonCyan.copy(alpha = 0.5f)
+      Card(
+        modifier = Modifier
+          .fillMaxWidth()
+          .border(1.dp, CleanBorder, RoundedCornerShape(16.dp)),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = CleanCard),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
       ) {
         Row(
-          modifier = Modifier.fillMaxWidth(),
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(18.dp),
           verticalAlignment = Alignment.CenterVertically
         ) {
           Box(
             modifier = Modifier
               .size(54.dp)
               .clip(CircleShape)
-              .background(NeonCyan.copy(alpha = 0.2f))
-              .border(2.dp, NeonCyan, CircleShape),
+              .background(CleanPrimaryLight)
+              .border(1.5.dp, CleanPrimary, CircleShape),
             contentAlignment = Alignment.Center
           ) {
-            Text(text = "⚡", fontSize = 24.sp)
+            Icon(
+              imageVector = Icons.Default.Person,
+              contentDescription = null,
+              tint = CleanPrimary,
+              modifier = Modifier.size(28.dp)
+            )
           }
 
           Spacer(modifier = Modifier.width(14.dp))
 
           Column {
             Text(
-              text = user.name,
+              text = user.name.ifBlank { "REBORN Athlete" },
               fontSize = 18.sp,
-              fontWeight = FontWeight.Black,
+              fontWeight = FontWeight.Bold,
               color = TextPrimary
             )
             Text(
-              text = "${user.title} • ${user.rankTier}",
-              fontSize = 13.sp,
-              fontWeight = FontWeight.Bold,
-              color = NeonGreen
-            )
-            Text(
-              text = user.startDate,
-              fontSize = 11.sp,
-              color = TextTertiary
+              text = "Started: ${user.startDate} • Streak: ${user.streakDays} Days",
+              fontSize = 12.sp,
+              color = TextSecondary
             )
           }
         }
       }
     }
 
-    // Achievements & Badges Gallery
+    // Daily Targets Card
     item {
-      CyberCard(
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-        borderColor = NeonAmber.copy(alpha = 0.4f)
+      Card(
+        modifier = Modifier
+          .fillMaxWidth()
+          .border(1.dp, CleanBorder, RoundedCornerShape(16.dp)),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = CleanCard),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
       ) {
-        Row(
-          modifier = Modifier.fillMaxWidth(),
-          horizontalArrangement = Arrangement.SpaceBetween,
-          verticalAlignment = Alignment.CenterVertically
-        ) {
-          Text(
-            text = "TROPHY VAULT & BADGES",
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Bold,
-            color = NeonAmber,
-            letterSpacing = 1.sp
-          )
-          Text(
-            text = "${badges.count { it.isUnlocked }} / ${badges.size} UNLOCKED",
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Bold,
-            color = TextSecondary
-          )
-        }
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        badges.forEach { badge ->
-          Surface(
-            shape = RoundedCornerShape(10.dp),
-            color = if (badge.isUnlocked) CyberSurfaceVariant else Color(0xFF10131A),
-            border = androidx.compose.foundation.BorderStroke(
-              1.dp,
-              if (badge.isUnlocked) NeonAmber.copy(alpha = 0.5f) else CyberCardBorder
-            ),
-            modifier = Modifier
-              .fillMaxWidth()
-              .padding(vertical = 4.dp)
+        Column(modifier = Modifier.padding(18.dp)) {
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
           ) {
-            Row(
-              modifier = Modifier.padding(10.dp),
-              verticalAlignment = Alignment.CenterVertically
+            Text(
+              text = "DAILY TARGETS",
+              fontSize = 11.sp,
+              fontWeight = FontWeight.Bold,
+              color = CleanPrimary,
+              letterSpacing = 0.8.sp
+            )
+            TextButton(
+              onClick = { showTargetsDialog = true },
+              modifier = Modifier.testTag("btn_edit_targets")
             ) {
-              Text(
-                text = badge.iconEmoji,
-                fontSize = 20.sp,
-                modifier = Modifier.padding(end = 10.dp)
-              )
-              Column(modifier = Modifier.weight(1f)) {
-                Text(
-                  text = badge.title,
-                  fontSize = 13.sp,
-                  fontWeight = FontWeight.Bold,
-                  color = if (badge.isUnlocked) TextPrimary else TextTertiary
-                )
-                Text(
-                  text = badge.description,
-                  fontSize = 11.sp,
-                  color = TextTertiary
-                )
-              }
-              if (badge.isUnlocked) {
-                Surface(
-                  shape = RoundedCornerShape(6.dp),
-                  color = NeonAmber.copy(alpha = 0.15f)
-                ) {
-                  Text(
-                    text = "+${badge.xpBonus} XP",
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = NeonAmber,
-                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                  )
-                }
-              }
+              Text("Edit", color = CleanPrimary, fontWeight = FontWeight.Bold, fontSize = 12.sp)
             }
           }
+
+          Spacer(modifier = Modifier.height(10.dp))
+
+          TargetSummaryRow(icon = Icons.Default.DirectionsWalk, label = "Daily Step Goal", value = "${user.dailyStepTarget} steps")
+          Spacer(modifier = Modifier.height(8.dp))
+          TargetSummaryRow(icon = Icons.Default.WaterDrop, label = "Daily Water Goal", value = "${user.dailyWaterTargetMl} ml")
+          Spacer(modifier = Modifier.height(8.dp))
+          TargetSummaryRow(icon = Icons.Default.Straighten, label = "Distance Target", value = "${user.dailyKmTarget} km")
         }
       }
     }
 
-    // System Actions (Export & Reset)
+    // Data Management Card
     item {
-      CyberCard(
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-        borderColor = CyberCardBorder
+      Card(
+        modifier = Modifier
+          .fillMaxWidth()
+          .border(1.dp, CleanBorder, RoundedCornerShape(16.dp)),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = CleanCard),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
       ) {
-        Text(
-          text = "DATA MANAGEMENT & BACKUP",
-          fontSize = 12.sp,
-          fontWeight = FontWeight.Bold,
-          color = TextSecondary,
-          letterSpacing = 1.sp
-        )
+        Column(modifier = Modifier.padding(18.dp)) {
+          Text(
+            text = "DATA MANAGEMENT",
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            color = TextSecondary,
+            letterSpacing = 0.6.sp
+          )
 
-        Spacer(modifier = Modifier.height(12.dp))
+          Spacer(modifier = Modifier.height(14.dp))
 
-        OutlinedButton(
-          onClick = {
-            exportFormat = "JSON"
-            showExportDialog = true
-          },
-          modifier = Modifier.fillMaxWidth(),
-          shape = RoundedCornerShape(10.dp),
-          border = androidx.compose.foundation.BorderStroke(1.dp, NeonCyan)
-        ) {
-          Icon(Icons.Default.Download, contentDescription = null, tint = NeonCyan, modifier = Modifier.size(16.dp))
-          Spacer(modifier = Modifier.width(8.dp))
-          Text("EXPORT PROGRESS AS JSON / CSV", color = NeonCyan, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-        }
+          OutlinedButton(
+            onClick = { showExportDialog = true },
+            modifier = Modifier
+              .fillMaxWidth()
+              .height(44.dp)
+              .testTag("btn_export_data"),
+            shape = RoundedCornerShape(10.dp),
+            border = BorderStroke(1.dp, CleanBorder)
+          ) {
+            Icon(Icons.Default.Download, contentDescription = null, tint = CleanPrimary, modifier = Modifier.size(18.dp))
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Export Transformation Data (JSON)", color = TextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+          }
 
-        Spacer(modifier = Modifier.height(10.dp))
+          Spacer(modifier = Modifier.height(10.dp))
 
-        Button(
-          onClick = { showResetDialog = true },
-          modifier = Modifier.fillMaxWidth(),
-          shape = RoundedCornerShape(10.dp),
-          colors = ButtonDefaults.buttonColors(containerColor = NeonCrimson.copy(alpha = 0.2f), contentColor = NeonCrimson),
-          border = androidx.compose.foundation.BorderStroke(1.dp, NeonCrimson)
-        ) {
-          Icon(Icons.Default.Warning, contentDescription = null, tint = NeonCrimson, modifier = Modifier.size(16.dp))
-          Spacer(modifier = Modifier.width(8.dp))
-          Text("RESET 30-DAY CHALLENGE", fontWeight = FontWeight.Bold, fontSize = 12.sp)
-        }
+          OutlinedButton(
+            onClick = { showResetDialog = true },
+            modifier = Modifier
+              .fillMaxWidth()
+              .height(44.dp)
+              .testTag("btn_reset_challenge"),
+            shape = RoundedCornerShape(10.dp),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFDC2626)),
+            border = BorderStroke(1.dp, Color(0xFFFECACA))
+          ) {
+            Icon(Icons.Default.RestartAlt, contentDescription = null, tint = Color(0xFFDC2626), modifier = Modifier.size(18.dp))
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Reset 30-Day Plan", fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+          }
 
-        Spacer(modifier = Modifier.height(10.dp))
+          Spacer(modifier = Modifier.height(10.dp))
 
-        Button(
-          onClick = { viewModel.signOut() },
-          modifier = Modifier.fillMaxWidth(),
-          shape = RoundedCornerShape(10.dp),
-          colors = ButtonDefaults.buttonColors(containerColor = CyberSurfaceVariant, contentColor = TextPrimary),
-          border = androidx.compose.foundation.BorderStroke(1.dp, CyberCardBorder)
-        ) {
-          Icon(Icons.Default.ExitToApp, contentDescription = null, tint = NeonCyan, modifier = Modifier.size(16.dp))
-          Spacer(modifier = Modifier.width(8.dp))
-          Text("LOGOUT / SWITCH HUNTER ACCOUNT", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = TextPrimary)
+          Button(
+            onClick = { viewModel.signOut() },
+            modifier = Modifier
+              .fillMaxWidth()
+              .height(44.dp)
+              .testTag("btn_sign_out"),
+            shape = RoundedCornerShape(10.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF1F5F9), contentColor = TextPrimary),
+            border = BorderStroke(1.dp, CleanBorder)
+          ) {
+            Icon(Icons.Default.ExitToApp, contentDescription = null, tint = TextSecondary, modifier = Modifier.size(18.dp))
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Sign Out", fontWeight = FontWeight.SemiBold, fontSize = 13.sp, color = TextPrimary)
+          }
         }
       }
     }
+  }
+
+  // Edit Targets Dialog
+  if (showTargetsDialog) {
+    var waterInput by remember { mutableStateOf(user.dailyWaterTargetMl.toString()) }
+    var stepInput by remember { mutableStateOf(user.dailyStepTarget.toString()) }
+    var kmInput by remember { mutableStateOf(user.dailyKmTarget.toString()) }
+
+    AlertDialog(
+      onDismissRequest = { showTargetsDialog = false },
+      title = { Text("Edit Daily Goals", fontWeight = FontWeight.Bold, fontSize = 18.sp) },
+      text = {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+          OutlinedTextField(
+            value = waterInput,
+            onValueChange = { waterInput = it.filter { c -> c.isDigit() } },
+            label = { Text("Water Goal (ml)") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+          )
+          OutlinedTextField(
+            value = stepInput,
+            onValueChange = { stepInput = it.filter { c -> c.isDigit() } },
+            label = { Text("Daily Step Goal") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+          )
+          OutlinedTextField(
+            value = kmInput,
+            onValueChange = { kmInput = it },
+            label = { Text("Daily Distance (km)") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+          )
+        }
+      },
+      confirmButton = {
+        Button(
+          onClick = {
+            val w = waterInput.toIntOrNull() ?: user.dailyWaterTargetMl
+            val s = stepInput.toIntOrNull() ?: user.dailyStepTarget
+            val k = kmInput.toFloatOrNull() ?: user.dailyKmTarget
+            viewModel.updateTargets(w, s, k)
+            showTargetsDialog = false
+          },
+          colors = ButtonDefaults.buttonColors(containerColor = CleanPrimary)
+        ) {
+          Text("Save Targets")
+        }
+      },
+      dismissButton = {
+        TextButton(onClick = { showTargetsDialog = false }) {
+          Text("Cancel", color = TextSecondary)
+        }
+      }
+    )
   }
 
   // Reset Confirmation Dialog
   if (showResetDialog) {
     AlertDialog(
       onDismissRequest = { showResetDialog = false },
-      title = { Text("Reset Challenge?", color = NeonCrimson, fontWeight = FontWeight.Bold) },
+      title = { Text("Reset 30-Day Plan?", color = Color(0xFFDC2626), fontWeight = FontWeight.Bold) },
       text = {
         Text(
-          "This will reset your 30-Day mission progress, active XP, and stride logs back to Day 1. Are you sure you wish to restart your rebirth?",
+          "This will reset your 30-Day transformation plan back to Day 1. Are you sure?",
           color = TextSecondary,
           fontSize = 13.sp
         )
@@ -264,7 +296,7 @@ fun SettingsScreen(
             viewModel.resetChallenge()
             showResetDialog = false
           },
-          colors = ButtonDefaults.buttonColors(containerColor = NeonCrimson, contentColor = Color.White)
+          colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDC2626), contentColor = Color.White)
         ) {
           Text("Confirm Reset")
         }
@@ -273,8 +305,7 @@ fun SettingsScreen(
         TextButton(onClick = { showResetDialog = false }) {
           Text("Cancel", color = TextSecondary)
         }
-      },
-      containerColor = CyberSurface
+      }
     )
   }
 
@@ -284,31 +315,30 @@ fun SettingsScreen(
       {
         "app": "reborn",
         "user": "${user.name}",
-        "level": ${user.level},
-        "xp": ${user.currentXp},
         "streakDays": ${user.streakDays},
         "challengeDay": ${user.currentChallengeDay},
-        "rank": "${user.rankTier}",
+        "stepGoal": ${user.dailyStepTarget},
+        "waterGoal": ${user.dailyWaterTargetMl},
         "timestamp": ${System.currentTimeMillis()}
       }
     """.trimIndent()
 
     AlertDialog(
       onDismissRequest = { showExportDialog = false },
-      title = { Text("Export Progress Data", color = TextPrimary, fontWeight = FontWeight.Bold) },
+      title = { Text("Export Progress Data", fontWeight = FontWeight.Bold) },
       text = {
         Column {
-          Text("Your progress dossier is generated below:", color = TextSecondary, fontSize = 12.sp)
+          Text("Export JSON format:", fontSize = 12.sp, color = TextSecondary)
           Spacer(modifier = Modifier.height(8.dp))
           Surface(
             shape = RoundedCornerShape(8.dp),
-            color = VoidBlack,
+            color = Color(0xFFF1F5F9),
             modifier = Modifier.fillMaxWidth()
           ) {
             Text(
               text = exportData,
-              color = NeonGreen,
               fontSize = 11.sp,
+              color = TextPrimary,
               modifier = Modifier.padding(10.dp)
             )
           }
@@ -318,21 +348,41 @@ fun SettingsScreen(
         Button(
           onClick = {
             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            clipboard.setPrimaryClip(ClipData.newPlainText("Reborn Data", exportData))
-            Toast.makeText(context, "Copied to clipboard!", Toast.LENGTH_SHORT).show()
+            val clip = ClipData.newPlainText("Reborn Data", exportData)
+            clipboard.setPrimaryClip(clip)
+            Toast.makeText(context, "Copied to clipboard", Toast.LENGTH_SHORT).show()
             showExportDialog = false
           },
-          colors = ButtonDefaults.buttonColors(containerColor = NeonCyan, contentColor = VoidBlack)
+          colors = ButtonDefaults.buttonColors(containerColor = CleanPrimary)
         ) {
-          Text("Copy to Clipboard")
+          Text("Copy JSON")
         }
       },
       dismissButton = {
         TextButton(onClick = { showExportDialog = false }) {
           Text("Close", color = TextSecondary)
         }
-      },
-      containerColor = CyberSurface
+      }
     )
+  }
+}
+
+@Composable
+private fun TargetSummaryRow(
+  icon: androidx.compose.ui.graphics.vector.ImageVector,
+  label: String,
+  value: String
+) {
+  Row(
+    modifier = Modifier.fillMaxWidth(),
+    horizontalArrangement = Arrangement.SpaceBetween,
+    verticalAlignment = Alignment.CenterVertically
+  ) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+      Icon(icon, contentDescription = null, tint = CleanPrimary, modifier = Modifier.size(18.dp))
+      Spacer(modifier = Modifier.width(8.dp))
+      Text(text = label, fontSize = 13.sp, color = TextSecondary)
+    }
+    Text(text = value, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
   }
 }

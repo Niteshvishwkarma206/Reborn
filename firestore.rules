@@ -72,8 +72,16 @@ service cloud.firestore {
 
     function isValidWorkout(data) {
       return data.id is string && data.id.size() > 0 && data.id.size() <= 128 &&
-             data.summary is string && data.summary.size() > 0 && data.summary.size() <= 500 &&
-             (!('completedAt' in data) || data.completedAt is timestamp);
+             (!('summary' in data) || (data.summary is string && data.summary.size() <= 500)) &&
+             (!('day' in data) || (data.day is int && data.day >= 1 && data.day <= 30)) &&
+             (!('totalExercises' in data) || (data.totalExercises is int && data.totalExercises >= 0)) &&
+             (!('completedExercises' in data) || (data.completedExercises is int && data.completedExercises >= 0)) &&
+             (!('percentage' in data) || (data.percentage is int && data.percentage >= 0 && data.percentage <= 100)) &&
+             (!('isRestDay' in data) || data.isRestDay is bool) &&
+             (!('isCompleted' in data) || data.isCompleted is bool) &&
+             (!('completedExerciseIds' in data) || data.completedExerciseIds is list) &&
+             (!('completedAt' in data) || data.completedAt is timestamp || data.completedAt is int) &&
+             (!('updatedAt' in data) || data.updatedAt is timestamp);
     }
 
     function isValidNutrition(data) {

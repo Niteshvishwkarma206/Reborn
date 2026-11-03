@@ -1,27 +1,30 @@
 package com.example.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.data.model.DailyHabit
 import com.example.data.model.DailyMission
+import com.example.data.model.StepSource
 import com.example.data.model.UserProfile
 import com.example.ui.components.*
 import com.example.ui.theme.*
@@ -35,294 +38,566 @@ fun DashboardScreen(
   missions: List<DailyMission>,
   onNavigate: (AppScreen) -> Unit
 ) {
-  val todayMissions = missions.filter { it.day == user.currentChallengeDay }
-  val completedMissions = missions.count { it.isCompleted }
-  val totalMissions = missions.size
-  val overallPercentage = if (totalMissions > 0) (completedMissions * 100) / totalMissions else 0
+  val stepState by viewModel.stepTrackerState.collectAsStateWithLifecycle()
+  val habits by viewModel.dailyHabits.collectAsStateWithLifecycle()
+  val nutrition by viewModel.todayNutrition.collectAsStateWithLifecycle()
+  val workoutProgressMap by viewModel.dailyWorkoutProgress.collectAsStateWithLifecycle()
+
+  val currentDay = user.currentChallengeDay
+  val todayWorkout = remember(currentDay) { viewModel.getWorkoutForDay(currentDay) }
+  val todayProgress = workoutProgressMap[currentDay] ?: remember(currentDay) {
+    viewModel.getWorkoutProgressForDay(currentDay)
+  }
+
+  // Calculate plan completion based on completed days
+  val completedDaysCount = (1..30).count { d ->
+    val prog = workoutProgressMap[d] ?: viewModel.getWorkoutProgressForDay(d)
+    prog.isCompleted
+  }
+  val planCompletionPercentage = (completedDaysCount * 100) / 30
 
   LazyColumn(
     modifier = Modifier
       .fillMaxSize()
-      .background(CyberBackground),
-    contentPadding = PaddingValues(bottom = 90.dp)
+      .background(CleanBackground)
+      .testTag("dashboard_screen"),
+    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 96.dp),
+    verticalArrangement = Arrangement.spacedBy(14.dp)
   ) {
+    // Top Bar Header
     item {
       RebornTopHeader(
-        title = "REBORN",
-        subtitle = "REBUILD YOURSELF. LEVEL UP YOUR LIFE.",
+        title = "reborn",
+        subtitle = "Clean fitness & daily transformation",
         streakDays = user.streakDays
       )
     }
 
-    // Hero Transformation Protocol Status Banner
+    // 1. Day X of 30 & Overall Plan Completion
     item {
-      CyberCard(
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-        borderColor = NeonGreen.copy(alpha = 0.5f)
+      Card(
+        modifier = Modifier
+          .fillMaxWidth()
+          .border(1.dp, CleanBorder, RoundedCornerShape(16.dp))
+          .testTag("card_plan_progress"),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = CleanCard),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
       ) {
-        Row(
-          modifier = Modifier.fillMaxWidth(),
-          horizontalArrangement = Arrangement.SpaceBetween,
-          verticalAlignment = Alignment.CenterVertically
-        ) {
-          Column {
-            Text(
-              text = "CHALLENGE PROGRESS",
-              fontSize = 11.sp,
-              fontWeight = FontWeight.Bold,
-              color = NeonGreen,
-              letterSpacing = 1.sp
-            )
-            Text(
-              text = "Day ${user.currentChallengeDay} of 30",
-              fontSize = 24.sp,
-              fontWeight = FontWeight.Black,
-              color = TextPrimary
-            )
+        Column(modifier = Modifier.padding(18.dp)) {
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+          ) {
+            Column {
+              Text(
+                text = "30-DAY TRANSFORMATION",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                color = CleanPrimary,
+                letterSpacing = 0.8.sp
+              )
+              Spacer(modifier = Modifier.height(4.dp))
+              Text(
+                text = "Day $currentDay of 30",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextPrimary
+              )
+            }
+
+            Box(
+              modifier = Modifier
+                .size(56.dp)
+                .clip(CircleShape)
+                .background(CleanPrimaryLight)
+                .border(2.dp, CleanPrimary, CircleShape),
+              contentAlignment = Alignment.Center
+            ) {
+              Text(
+                text = "$planCompletionPercentage%",
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp,
+                color = CleanPrimaryDark
+              )
+            }
           }
 
-          Box(
+          Spacer(modifier = Modifier.height(12.dp))
+
+          LinearProgressIndicator(
+            progress = { (planCompletionPercentage / 100f).coerceIn(0f, 1f) },
             modifier = Modifier
-              .size(56.dp)
-              .clip(CircleShape)
-              .background(
-                Brush.radialGradient(
-                  listOf(NeonGreen.copy(alpha = 0.25f), Color.Transparent)
-                )
-              )
-              .border(2.dp, NeonGreen, CircleShape),
-            contentAlignment = Alignment.Center
+              .fillMaxWidth()
+              .height(8.dp)
+              .clip(RoundedCornerShape(4.dp)),
+            color = CleanPrimary,
+            trackColor = Color(0xFFE2E8F0)
+          )
+
+          Spacer(modifier = Modifier.height(8.dp))
+
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
           ) {
             Text(
-              text = "$overallPercentage%",
-              fontWeight = FontWeight.Black,
-              fontSize = 14.sp,
-              color = NeonGreen
+              text = "$completedDaysCount of 30 days completed",
+              fontSize = 12.sp,
+              color = TextSecondary,
+              fontWeight = FontWeight.Medium
+            )
+            Text(
+              text = "View Chart",
+              fontSize = 12.sp,
+              fontWeight = FontWeight.Bold,
+              color = CleanPrimary,
+              modifier = Modifier
+                .clickable { onNavigate(AppScreen.PROGRESS) }
+                .testTag("btn_view_progress_chart")
             )
           }
         }
-
-        Spacer(modifier = Modifier.height(10.dp))
-        Text(
-          text = "${completedMissions} of ${totalMissions} transformation missions conquered",
-          fontSize = 12.sp,
-          color = TextSecondary
-        )
       }
     }
 
-    // Player XP and Level Bar
+    // 2. Today's Workout Card with Circular Progress & Start Workout
     item {
-      XpProgressBar(
-        level = user.level,
-        currentXp = user.currentXp,
-        xpToNextLevel = user.xpToNextLevel,
-        rankTitle = user.title,
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
-      )
-    }
+      Card(
+        modifier = Modifier
+          .fillMaxWidth()
+          .border(1.dp, CleanBorder, RoundedCornerShape(16.dp))
+          .testTag("card_today_workout"),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = CleanCard),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+      ) {
+        Column(modifier = Modifier.padding(18.dp)) {
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top
+          ) {
+            Column(modifier = Modifier.weight(1f)) {
+              Text(
+                text = "TODAY'S WORKOUT",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextSecondary,
+                letterSpacing = 0.6.sp
+              )
+              Spacer(modifier = Modifier.height(4.dp))
+              Text(
+                text = todayWorkout.title,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextPrimary
+              )
+              Spacer(modifier = Modifier.height(2.dp))
+              Text(
+                text = if (todayWorkout.isRestDay) "Active Recovery & Mobility Day"
+                else "${todayWorkout.focus} • ${todayWorkout.estimatedMinutes} min • ${todayWorkout.exercises.size} exercises",
+                fontSize = 12.sp,
+                color = TextSecondary
+              )
+            }
 
-    // Quick Command Access Strip (Horizontal Scroll for All 10 Domains)
-    item {
-      Column(modifier = Modifier.padding(vertical = 8.dp)) {
-        Text(
-          text = "COMMAND MODULES",
-          fontSize = 12.sp,
-          fontWeight = FontWeight.Bold,
-          color = TextSecondary,
-          modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-          letterSpacing = 1.sp
-        )
-        LazyRow(
-          contentPadding = PaddingValues(horizontal = 16.dp),
-          horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-          val modules = listOf(
-            Triple("30-Day", Icons.Default.Flag, AppScreen.CHALLENGE),
-            Triple("Workout", Icons.Default.FitnessCenter, AppScreen.WORKOUT),
-            Triple("Exercises", Icons.Default.FormatListBulleted, AppScreen.EXERCISES),
-            Triple("Stride", Icons.Default.DirectionsWalk, AppScreen.WALKING),
-            Triple("Fuel", Icons.Default.Restaurant, AppScreen.NUTRITION),
-            Triple("Mind", Icons.Default.Psychology, AppScreen.MIND),
-            Triple("Persona", Icons.Default.MilitaryTech, AppScreen.PERSONALITY),
-            Triple("Analytics", Icons.Default.BarChart, AppScreen.PROGRESS)
-          )
+            CircularWorkoutProgress(
+              percentage = todayProgress.percentage,
+              size = 64.dp,
+              strokeWidth = 6.dp,
+              label = if (todayProgress.isCompleted) "Done" else "${todayProgress.completedExercises}/${todayProgress.totalExercises}"
+            )
+          }
 
-          items(modules) { (label, icon, targetScreen) ->
-            Surface(
-              shape = RoundedCornerShape(12.dp),
-              color = CyberSurface,
-              border = androidx.compose.foundation.BorderStroke(1.dp, CyberCardBorder),
-              modifier = Modifier.clickable { onNavigate(targetScreen) }
-            ) {
-              Row(
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-              ) {
-                Icon(
-                  imageVector = icon,
-                  contentDescription = label,
-                  tint = NeonGreen,
-                  modifier = Modifier.size(16.dp)
-                )
-                Spacer(modifier = Modifier.width(6.dp))
+          Spacer(modifier = Modifier.height(14.dp))
+
+          // Exercises checklist preview
+          if (todayWorkout.exercises.isNotEmpty()) {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+              todayWorkout.exercises.take(3).forEach { ex ->
+                val isDone = todayProgress.completedExerciseIds.contains(ex.id)
+                Row(
+                  modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable { viewModel.toggleExerciseInWorkout(currentDay, ex.id) }
+                    .padding(vertical = 4.dp),
+                  verticalAlignment = Alignment.CenterVertically
+                ) {
+                  Checkbox(
+                    checked = isDone,
+                    onCheckedChange = { viewModel.toggleExerciseInWorkout(currentDay, ex.id) },
+                    colors = CheckboxDefaults.colors(
+                      checkedColor = CleanPrimary,
+                      uncheckedColor = Color(0xFF94A3B8)
+                    ),
+                    modifier = Modifier.size(24.dp)
+                  )
+                  Spacer(modifier = Modifier.width(10.dp))
+                  Text(
+                    text = ex.name,
+                    fontSize = 13.sp,
+                    color = if (isDone) TextSecondary else TextPrimary,
+                    textDecoration = if (isDone) TextDecoration.LineThrough else TextDecoration.None,
+                    fontWeight = if (isDone) FontWeight.Normal else FontWeight.Medium
+                  )
+                  Spacer(modifier = Modifier.weight(1f))
+                  Text(
+                    text = ex.defaultSetsReps,
+                    fontSize = 11.sp,
+                    color = TextSecondary
+                  )
+                }
+              }
+              if (todayWorkout.exercises.size > 3) {
                 Text(
-                  text = label,
-                  fontSize = 12.sp,
-                  fontWeight = FontWeight.Bold,
-                  color = TextPrimary
+                  text = "+ ${todayWorkout.exercises.size - 3} more exercises",
+                  fontSize = 11.sp,
+                  color = TextSecondary,
+                  modifier = Modifier.padding(start = 34.dp, top = 2.dp)
                 )
               }
+            }
+          }
+
+          Spacer(modifier = Modifier.height(14.dp))
+
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+          ) {
+            Button(
+              onClick = {
+                viewModel.startWorkoutForDay(currentDay)
+              },
+              modifier = Modifier
+                .weight(1f)
+                .height(44.dp)
+                .testTag("btn_start_workout"),
+              shape = RoundedCornerShape(10.dp),
+              colors = ButtonDefaults.buttonColors(containerColor = CleanPrimary)
+            ) {
+              Icon(
+                imageVector = if (todayProgress.isCompleted) Icons.Default.Check else Icons.Default.PlayArrow,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp)
+              )
+              Spacer(modifier = Modifier.width(6.dp))
+              Text(
+                text = if (todayProgress.isCompleted) "Workout Finished" else "Start Workout",
+                fontWeight = FontWeight.Bold,
+                fontSize = 13.sp
+              )
+            }
+
+            OutlinedButton(
+              onClick = { onNavigate(AppScreen.PLAN) },
+              modifier = Modifier
+                .height(44.dp)
+                .testTag("btn_view_full_plan"),
+              shape = RoundedCornerShape(10.dp),
+              border = BorderStroke(1.dp, CleanBorder)
+            ) {
+              Text("Plan", color = TextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
             }
           }
         }
       }
     }
 
-    // Core Metrics Grid (2x2 HUD Tiles)
+    // 3. Steps Today, Distance Walked & Daily Step Goal
     item {
-      Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
-        Row(
-          modifier = Modifier.fillMaxWidth(),
-          horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-          MetricHudTile(
-            title = "Workouts",
-            value = "2 Done",
-            subtitle = "Active Protocol",
-            icon = Icons.Default.FitnessCenter,
-            accentColor = NeonGreen,
-            modifier = Modifier.weight(1f),
-            onClick = { onNavigate(AppScreen.WORKOUT) }
-          )
-          MetricHudTile(
-            title = "Stride Dist",
-            value = "7.2 km",
-            subtitle = "Goal: 5.0 km/day",
-            icon = Icons.Default.DirectionsWalk,
-            accentColor = NeonCyan,
-            modifier = Modifier.weight(1f),
-            onClick = { onNavigate(AppScreen.WALKING) }
-          )
-        }
+      Card(
+        modifier = Modifier
+          .fillMaxWidth()
+          .clip(RoundedCornerShape(16.dp))
+          .clickable { onNavigate(AppScreen.ACTIVITY) }
+          .border(1.dp, CleanBorder, RoundedCornerShape(16.dp))
+          .testTag("card_step_tracker"),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = CleanCard),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+      ) {
+        Column(modifier = Modifier.padding(18.dp)) {
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+          ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+              Box(
+                modifier = Modifier
+                  .size(36.dp)
+                  .clip(RoundedCornerShape(10.dp))
+                  .background(CleanEmeraldLight),
+                contentAlignment = Alignment.Center
+              ) {
+                Icon(
+                  imageVector = Icons.Default.DirectionsWalk,
+                  contentDescription = null,
+                  tint = CleanPrimary,
+                  modifier = Modifier.size(20.dp)
+                )
+              }
+              Spacer(modifier = Modifier.width(10.dp))
+              Column {
+                Text(
+                  text = "DAILY STEPS",
+                  fontSize = 11.sp,
+                  fontWeight = FontWeight.Bold,
+                  color = TextSecondary,
+                  letterSpacing = 0.6.sp
+                )
+                Text(
+                  text = "${stepState.todaySteps} / ${stepState.dailyGoal}",
+                  fontSize = 18.sp,
+                  fontWeight = FontWeight.Bold,
+                  color = TextPrimary
+                )
+              }
+            }
 
-        Spacer(modifier = Modifier.height(10.dp))
+            // Source Badge
+            val sourceText = when (stepState.source) {
+              StepSource.HEALTH_CONNECT -> "Health Connect"
+              StepSource.MANUAL -> "Manual"
+              StepSource.NONE -> "No Data"
+            }
+            Surface(
+              shape = RoundedCornerShape(6.dp),
+              color = if (stepState.source == StepSource.HEALTH_CONNECT) CleanPrimaryLight else Color(0xFFF1F5F9),
+              border = BorderStroke(1.dp, if (stepState.source == StepSource.HEALTH_CONNECT) CleanPrimary else Color(0xFFCBD5E1))
+            ) {
+              Text(
+                text = sourceText,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+                color = if (stepState.source == StepSource.HEALTH_CONNECT) CleanPrimaryDark else TextSecondary,
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+              )
+            }
+          }
 
-        Row(
-          modifier = Modifier.fillMaxWidth(),
-          horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-          MetricHudTile(
-            title = "Hydration",
-            value = "2.25 L",
-            subtitle = "+250ml Quick Add",
-            icon = Icons.Default.WaterDrop,
-            accentColor = NeonCyan,
-            modifier = Modifier.weight(1f),
-            onClick = { viewModel.addWater(250) }
-          )
-          MetricHudTile(
-            title = "Focus Rating",
-            value = "8 / 10",
-            subtitle = "Mind Fortress",
-            icon = Icons.Default.Psychology,
-            accentColor = NeonPurple,
-            modifier = Modifier.weight(1f),
-            onClick = { onNavigate(AppScreen.MIND) }
-          )
-        }
-      }
-    }
+          Spacer(modifier = Modifier.height(12.dp))
 
-    // Today's Missions Section
-    item {
-      Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-        Row(
-          modifier = Modifier.fillMaxWidth(),
-          horizontalArrangement = Arrangement.SpaceBetween,
-          verticalAlignment = Alignment.CenterVertically
-        ) {
-          Text(
-            text = "TODAY'S MISSIONS (DAY ${user.currentChallengeDay})",
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Bold,
-            color = TextSecondary,
-            letterSpacing = 1.sp
-          )
-          Text(
-            text = "VIEW ALL 30 DAYS",
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Bold,
-            color = NeonCyan,
-            modifier = Modifier.clickable { onNavigate(AppScreen.CHALLENGE) }
-          )
-        }
+          val stepProgress = if (stepState.dailyGoal > 0) {
+            (stepState.todaySteps.toFloat() / stepState.dailyGoal).coerceIn(0f, 1f)
+          } else 0f
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        if (todayMissions.isEmpty()) {
-          Text(
-            text = "No missions loaded for today.",
-            color = TextTertiary,
-            fontSize = 13.sp
+          LinearProgressIndicator(
+            progress = { stepProgress },
+            modifier = Modifier
+              .fillMaxWidth()
+              .height(8.dp)
+              .clip(RoundedCornerShape(4.dp)),
+            color = CleanPrimary,
+            trackColor = Color(0xFFE2E8F0)
           )
-        } else {
-          todayMissions.forEach { mission ->
-            MissionRowItem(
-              mission = mission,
-              onToggle = { viewModel.toggleMission(mission) }
+
+          Spacer(modifier = Modifier.height(8.dp))
+
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+          ) {
+            Text(
+              text = "Estimated: ${String.format("%.2f", stepState.distanceKm)} km",
+              fontSize = 12.sp,
+              color = TextSecondary,
+              fontWeight = FontWeight.Medium
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+              text = "Activity Log →",
+              fontSize = 12.sp,
+              fontWeight = FontWeight.SemiBold,
+              color = CleanPrimary
+            )
           }
         }
       }
     }
 
-    // Weekly Activity Visualizer (Mon-Sun Bar Chart)
+    // 4. Water Intake
     item {
-      CyberCard(
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-        borderColor = CyberCardBorder
+      Card(
+        modifier = Modifier
+          .fillMaxWidth()
+          .border(1.dp, CleanBorder, RoundedCornerShape(16.dp))
+          .testTag("card_water_intake"),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = CleanCard),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
       ) {
-        Text(
-          text = "WEEKLY CONSISTENCY RADAR",
-          fontSize = 11.sp,
-          fontWeight = FontWeight.Bold,
-          color = TextSecondary,
-          letterSpacing = 1.sp
-        )
-        Spacer(modifier = Modifier.height(14.dp))
-
-        val days = listOf("M" to 0.8f, "T" to 0.9f, "W" to 1.0f, "T" to 0.7f, "F" to 0.85f, "S" to 0.6f, "S" to 0.4f)
-        Row(
-          modifier = Modifier
-            .fillMaxWidth()
-            .height(90.dp),
-          horizontalArrangement = Arrangement.SpaceBetween,
-          verticalAlignment = Alignment.Bottom
-        ) {
-          days.forEach { (d, ratio) ->
-            Column(
-              horizontalAlignment = Alignment.CenterHorizontally,
-              verticalArrangement = Arrangement.Bottom
-            ) {
+        Column(modifier = Modifier.padding(18.dp)) {
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+          ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
               Box(
                 modifier = Modifier
-                  .width(18.dp)
-                  .height((70 * ratio).dp)
-                  .clip(RoundedCornerShape(4.dp))
-                  .background(
-                    Brush.verticalGradient(
-                      listOf(NeonCyan, NeonGreen)
-                    )
-                  )
-              )
-              Spacer(modifier = Modifier.height(6.dp))
+                  .size(36.dp)
+                  .clip(RoundedCornerShape(10.dp))
+                  .background(Color(0xFFE0F2FE)),
+                contentAlignment = Alignment.Center
+              ) {
+                Icon(
+                  imageVector = Icons.Default.WaterDrop,
+                  contentDescription = null,
+                  tint = CleanBlue,
+                  modifier = Modifier.size(20.dp)
+                )
+              }
+              Spacer(modifier = Modifier.width(10.dp))
+              Column {
+                Text(
+                  text = "WATER INTAKE",
+                  fontSize = 11.sp,
+                  fontWeight = FontWeight.Bold,
+                  color = TextSecondary,
+                  letterSpacing = 0.6.sp
+                )
+                Text(
+                  text = "${nutrition.waterMl} / ${user.dailyWaterTargetMl} ml",
+                  fontSize = 18.sp,
+                  fontWeight = FontWeight.Bold,
+                  color = TextPrimary
+                )
+              }
+            }
+
+            Text(
+              text = "${((nutrition.waterMl * 100f) / user.dailyWaterTargetMl).toInt().coerceAtMost(100)}%",
+              fontSize = 14.sp,
+              fontWeight = FontWeight.Bold,
+              color = CleanBlue
+            )
+          }
+
+          Spacer(modifier = Modifier.height(10.dp))
+
+          val waterProgress = if (user.dailyWaterTargetMl > 0) {
+            (nutrition.waterMl.toFloat() / user.dailyWaterTargetMl).coerceIn(0f, 1f)
+          } else 0f
+
+          LinearProgressIndicator(
+            progress = { waterProgress },
+            modifier = Modifier
+              .fillMaxWidth()
+              .height(8.dp)
+              .clip(RoundedCornerShape(4.dp)),
+            color = CleanBlue,
+            trackColor = Color(0xFFE2E8F0)
+          )
+
+          Spacer(modifier = Modifier.height(12.dp))
+
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+          ) {
+            OutlinedButton(
+              onClick = { viewModel.addWater(250) },
+              modifier = Modifier
+                .weight(1f)
+                .height(36.dp)
+                .testTag("btn_add_water_250"),
+              shape = RoundedCornerShape(8.dp),
+              border = BorderStroke(1.dp, Color(0xFFBAE6FD)),
+              contentPadding = PaddingValues(0.dp)
+            ) {
+              Text("+250 ml", fontSize = 12.sp, color = CleanBlue, fontWeight = FontWeight.Bold)
+            }
+
+            OutlinedButton(
+              onClick = { viewModel.addWater(500) },
+              modifier = Modifier
+                .weight(1f)
+                .height(36.dp)
+                .testTag("btn_add_water_500"),
+              shape = RoundedCornerShape(8.dp),
+              border = BorderStroke(1.dp, Color(0xFFBAE6FD)),
+              contentPadding = PaddingValues(0.dp)
+            ) {
+              Text("+500 ml", fontSize = 12.sp, color = CleanBlue, fontWeight = FontWeight.Bold)
+            }
+
+            OutlinedButton(
+              onClick = { viewModel.addWater(-250) },
+              modifier = Modifier
+                .weight(0.8f)
+                .height(36.dp)
+                .testTag("btn_remove_water_250"),
+              shape = RoundedCornerShape(8.dp),
+              border = BorderStroke(1.dp, CleanBorder),
+              contentPadding = PaddingValues(0.dp)
+            ) {
+              Text("-250 ml", fontSize = 12.sp, color = TextSecondary, fontWeight = FontWeight.Medium)
+            }
+          }
+        }
+      }
+    }
+
+    // 5. Today's Habits Checklist
+    item {
+      Card(
+        modifier = Modifier
+          .fillMaxWidth()
+          .border(1.dp, CleanBorder, RoundedCornerShape(16.dp))
+          .testTag("card_daily_habits"),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = CleanCard),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+      ) {
+        Column(modifier = Modifier.padding(18.dp)) {
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+          ) {
+            Column {
               Text(
-                text = d,
+                text = "TODAY'S HABITS",
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
-                color = if (ratio >= 0.8f) NeonGreen else TextTertiary
+                color = TextSecondary,
+                letterSpacing = 0.6.sp
+              )
+              Text(
+                text = "Daily Foundation",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextPrimary
+              )
+            }
+
+            val completedHabitsCount = habits.count { it.isCompleted }
+            Surface(
+              shape = RoundedCornerShape(8.dp),
+              color = if (completedHabitsCount == habits.size) CleanPrimaryLight else Color(0xFFF1F5F9),
+              border = BorderStroke(1.dp, if (completedHabitsCount == habits.size) CleanPrimary else CleanBorder)
+            ) {
+              Text(
+                text = "$completedHabitsCount / ${habits.size} Done",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                color = if (completedHabitsCount == habits.size) CleanPrimaryDark else TextSecondary,
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+              )
+            }
+          }
+
+          Spacer(modifier = Modifier.height(12.dp))
+
+          Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            habits.forEach { habit ->
+              HabitCheckRow(
+                habit = habit,
+                onToggle = { viewModel.toggleHabit(habit.id) }
               )
             }
           }
@@ -333,82 +608,44 @@ fun DashboardScreen(
 }
 
 @Composable
-fun MissionRowItem(
-  mission: DailyMission,
+private fun HabitCheckRow(
+  habit: DailyHabit,
   onToggle: () -> Unit
 ) {
-  Surface(
-    shape = RoundedCornerShape(12.dp),
-    color = if (mission.isCompleted) Color(0xFF0F1B1C) else CyberSurface,
-    border = androidx.compose.foundation.BorderStroke(
-      1.dp,
-      if (mission.isCompleted) NeonGreen.copy(alpha = 0.5f) else CyberCardBorder
-    ),
+  Row(
     modifier = Modifier
       .fillMaxWidth()
+      .clip(RoundedCornerShape(10.dp))
       .clickable { onToggle() }
+      .background(if (habit.isCompleted) Color(0xFFF8FAFC) else Color.Transparent)
+      .padding(horizontal = 4.dp, vertical = 6.dp),
+    verticalAlignment = Alignment.CenterVertically
   ) {
-    Row(
+    Checkbox(
+      checked = habit.isCompleted,
+      onCheckedChange = { onToggle() },
+      colors = CheckboxDefaults.colors(
+        checkedColor = CleanPrimary,
+        uncheckedColor = Color(0xFF94A3B8)
+      ),
       modifier = Modifier
-        .fillMaxWidth()
-        .padding(12.dp),
-      verticalAlignment = Alignment.CenterVertically
-    ) {
-      Box(
-        modifier = Modifier
-          .size(26.dp)
-          .clip(RoundedCornerShape(6.dp))
-          .background(
-            if (mission.isCompleted) NeonGreen else Color.Transparent
-          )
-          .border(
-            1.5.dp,
-            if (mission.isCompleted) NeonGreen else TextTertiary,
-            RoundedCornerShape(6.dp)
-          ),
-        contentAlignment = Alignment.Center
-      ) {
-        if (mission.isCompleted) {
-          Icon(
-            imageVector = Icons.Default.Check,
-            contentDescription = "Completed",
-            tint = VoidBlack,
-            modifier = Modifier.size(18.dp)
-          )
-        }
-      }
-
-      Spacer(modifier = Modifier.width(12.dp))
-
-      Column(modifier = Modifier.weight(1f)) {
-        Text(
-          text = mission.title,
-          fontSize = 14.sp,
-          fontWeight = FontWeight.Bold,
-          color = if (mission.isCompleted) TextSecondary else TextPrimary
-        )
-        Text(
-          text = mission.description,
-          fontSize = 11.sp,
-          color = TextTertiary,
-          maxLines = 2
-        )
-      }
-
-      Spacer(modifier = Modifier.width(8.dp))
-
-      Surface(
-        shape = RoundedCornerShape(8.dp),
-        color = Color(mission.category.badgeColor).copy(alpha = 0.15f)
-      ) {
-        Text(
-          text = "+${mission.xpReward} XP",
-          fontSize = 11.sp,
-          fontWeight = FontWeight.Bold,
-          color = Color(mission.category.badgeColor),
-          modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-        )
-      }
+        .size(24.dp)
+        .testTag("checkbox_habit_${habit.id}")
+    )
+    Spacer(modifier = Modifier.width(10.dp))
+    Column(modifier = Modifier.weight(1f)) {
+      Text(
+        text = habit.title,
+        fontSize = 14.sp,
+        fontWeight = if (habit.isCompleted) FontWeight.Normal else FontWeight.Medium,
+        color = if (habit.isCompleted) TextSecondary else TextPrimary,
+        textDecoration = if (habit.isCompleted) TextDecoration.LineThrough else TextDecoration.None
+      )
+      Text(
+        text = habit.category,
+        fontSize = 11.sp,
+        color = TextSecondary
+      )
     }
   }
 }

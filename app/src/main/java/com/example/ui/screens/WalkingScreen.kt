@@ -49,8 +49,8 @@ fun WalkingScreen(
   ) {
     item {
       RebornTopHeader(
-        title = "STRIDE TELEMETRY",
-        subtitle = "WALKING & RUNNING DISTANCE TRACKER"
+        title = "Walking & Running",
+        subtitle = "Daily distance, steps & stride tracking"
       )
     }
 
@@ -66,7 +66,7 @@ fun WalkingScreen(
             value = "%.1f km".format(todayDistanceKm),
             subtitle = "Target: %.1f km".format(user.dailyKmTarget),
             icon = Icons.Default.DirectionsWalk,
-            accentColor = NeonCyan,
+            accentColor = CleanPrimary,
             modifier = Modifier.weight(1f)
           )
           MetricHudTile(
@@ -74,7 +74,7 @@ fun WalkingScreen(
             value = "%.1f km".format(totalDistanceKm),
             subtitle = "All-time Challenge",
             icon = Icons.Default.DirectionsRun,
-            accentColor = NeonGreen,
+            accentColor = Color(0xFF0284C7),
             modifier = Modifier.weight(1f)
           )
         }
@@ -85,7 +85,7 @@ fun WalkingScreen(
     item {
       CyberCard(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-        borderColor = CyberCardBorder
+        borderColor = CleanBorder
       ) {
         Row(
           modifier = Modifier.fillMaxWidth(),
@@ -98,7 +98,7 @@ fun WalkingScreen(
               fontSize = 11.sp,
               fontWeight = FontWeight.Bold,
               color = TextSecondary,
-              letterSpacing = 1.sp
+              letterSpacing = 0.5.sp
             )
             Text(
               text = "Daily: %.1f km • %d Steps".format(user.dailyKmTarget, user.dailyStepTarget),
@@ -109,11 +109,11 @@ fun WalkingScreen(
           }
           OutlinedButton(
             onClick = { showTargetDialog = true },
-            border = androidx.compose.foundation.BorderStroke(1.dp, NeonCyan),
+            border = androidx.compose.foundation.BorderStroke(1.dp, CleanBorder),
             shape = RoundedCornerShape(10.dp),
             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
           ) {
-            Text("Edit Target", color = NeonCyan, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+            Text("Edit Target", color = CleanPrimary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
           }
         }
       }
@@ -124,14 +124,14 @@ fun WalkingScreen(
       Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
         Button(
           onClick = { showLogDialog = true },
-          colors = ButtonDefaults.buttonColors(containerColor = NeonCyan, contentColor = VoidBlack),
+          colors = ButtonDefaults.buttonColors(containerColor = CleanPrimary, contentColor = Color.White),
           modifier = Modifier.fillMaxWidth(),
           shape = RoundedCornerShape(12.dp),
           contentPadding = PaddingValues(vertical = 12.dp)
         ) {
           Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
           Spacer(modifier = Modifier.width(8.dp))
-          Text("LOG WALK OR RUN SESSION", fontWeight = FontWeight.Black, fontSize = 13.sp)
+          Text("LOG WALK OR RUN SESSION", fontWeight = FontWeight.Bold, fontSize = 13.sp)
         }
       }
     }
@@ -139,12 +139,12 @@ fun WalkingScreen(
     // Activity Log History Header
     item {
       Text(
-        text = "STRIDE ACTIVITY LOGS",
+        text = "ACTIVITY HISTORY",
         fontSize = 12.sp,
         fontWeight = FontWeight.Bold,
         color = TextSecondary,
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-        letterSpacing = 1.sp
+        letterSpacing = 0.5.sp
       )
     }
 
@@ -205,7 +205,7 @@ fun WalkingScreen(
 fun StrideActivityCard(activity: WalkingActivity) {
   val isRun = activity.activityType.equals("Running", ignoreCase = true)
   CyberCard(
-    borderColor = if (isRun) NeonAmber.copy(alpha = 0.4f) else NeonCyan.copy(alpha = 0.3f)
+    borderColor = CleanBorder
   ) {
     Row(
       modifier = Modifier.fillMaxWidth(),
@@ -213,14 +213,16 @@ fun StrideActivityCard(activity: WalkingActivity) {
       verticalAlignment = Alignment.CenterVertically
     ) {
       Row(verticalAlignment = Alignment.CenterVertically) {
+        val badgeBg = if (isRun) Color(0xFFFEF3C7) else Color(0xFFECFDF5)
+        val badgeTint = if (isRun) Color(0xFFD97706) else CleanPrimary
         Surface(
           shape = RoundedCornerShape(10.dp),
-          color = (if (isRun) NeonAmber else NeonCyan).copy(alpha = 0.15f)
+          color = badgeBg
         ) {
           Icon(
             imageVector = if (isRun) Icons.Default.DirectionsRun else Icons.Default.DirectionsWalk,
             contentDescription = null,
-            tint = if (isRun) NeonAmber else NeonCyan,
+            tint = badgeTint,
             modifier = Modifier
               .padding(8.dp)
               .size(22.dp)
@@ -245,8 +247,8 @@ fun StrideActivityCard(activity: WalkingActivity) {
       Text(
         text = "%.2f km".format(activity.distanceKm),
         fontSize = 18.sp,
-        fontWeight = FontWeight.Black,
-        color = if (isRun) NeonAmber else NeonCyan
+        fontWeight = FontWeight.Bold,
+        color = if (isRun) Color(0xFFD97706) else CleanPrimary
       )
     }
 
@@ -255,7 +257,7 @@ fun StrideActivityCard(activity: WalkingActivity) {
       Text(
         text = "Note: ${activity.notes}",
         fontSize = 12.sp,
-        color = TextTertiary
+        color = TextSecondary
       )
     }
   }
@@ -281,12 +283,20 @@ fun LogStrideDialog(
           FilterChip(
             selected = activityType == "Walking",
             onClick = { activityType = "Walking" },
-            label = { Text("Walking") }
+            label = { Text("Walking") },
+            colors = FilterChipDefaults.filterChipColors(
+              selectedContainerColor = CleanPrimary.copy(alpha = 0.15f),
+              selectedLabelColor = CleanPrimary
+            )
           )
           FilterChip(
             selected = activityType == "Running",
             onClick = { activityType = "Running" },
-            label = { Text("Running") }
+            label = { Text("Running") },
+            colors = FilterChipDefaults.filterChipColors(
+              selectedContainerColor = CleanPrimary.copy(alpha = 0.15f),
+              selectedLabelColor = CleanPrimary
+            )
           )
         }
         Spacer(modifier = Modifier.height(8.dp))
@@ -327,15 +337,15 @@ fun LogStrideDialog(
           val st = steps.toIntOrNull() ?: 4000
           onSave(activityType, km, mins, st, notes)
         },
-        colors = ButtonDefaults.buttonColors(containerColor = NeonCyan, contentColor = VoidBlack)
+        colors = ButtonDefaults.buttonColors(containerColor = CleanPrimary, contentColor = Color.White)
       ) {
-        Text("Save Stride")
+        Text("Save Session")
       }
     },
     dismissButton = {
       TextButton(onClick = onDismiss) { Text("Cancel", color = TextSecondary) }
     },
-    containerColor = CyberSurface
+    containerColor = CleanCard
   )
 }
 
@@ -376,7 +386,7 @@ fun EditTargetDialog(
           val newSteps = steps.toIntOrNull() ?: 8000
           onSave(newKm, newSteps)
         },
-        colors = ButtonDefaults.buttonColors(containerColor = NeonCyan, contentColor = VoidBlack)
+        colors = ButtonDefaults.buttonColors(containerColor = CleanPrimary, contentColor = Color.White)
       ) {
         Text("Save Target")
       }
@@ -384,6 +394,6 @@ fun EditTargetDialog(
     dismissButton = {
       TextButton(onClick = onDismiss) { Text("Cancel", color = TextSecondary) }
     },
-    containerColor = CyberSurface
+    containerColor = CleanCard
   )
 }

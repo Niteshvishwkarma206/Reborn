@@ -2,37 +2,57 @@ package com.example.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Core Pitch Black and Dark Obsidian Surfaces (Concept 1: Neon Gaming)
-val VoidBlack = Color(0xFF07080A)
-val CyberBackground = Color(0xFF0B0E13)
-val CyberSurface = Color(0xFF11161F)
-val CyberSurfaceVariant = Color(0xFF19212E)
-val CyberCardBorder = Color(0xFF1B3D2B)
-val CyberCardElevated = Color(0xFF151C26)
+// Theme 1: Clean Light Palette Tokens
+val CleanBackground = Color(0xFFF8F9FA)      // Pure Clean Off-White Background
+val CleanCard = Color(0xFFFFFFFF)            // Pure White Card Surface
+val CleanCardVariant = Color(0xFFF1F5F9)     // Soft slate tinted surface
+val CleanBorder = Color(0xFFE2E8F0)          // Crisp Light Grey Outline Border
+val CleanBorderHover = Color(0xFFCBD5E1)     // Subtle hover / focused outline
 
-// Neon Gaming Accents (Electric Green Dominant)
-val NeonGreen = Color(0xFF00FF66)
-val NeonGreenBright = Color(0xFF10FFA0)
-val NeonGreenDark = Color(0xFF00C853)
-val NeonGreenMuted = Color(0x3300FF66)
-val NeonGreenGlow = Color(0x6600FF66)
+// Primary Brand Colors (Emerald Green)
+val CleanPrimary = Color(0xFF10B981)         // Forest Emerald Green
+val CleanPrimaryDark = Color(0xFF059669)     // Deeper Emerald for active press
+val CleanPrimaryLight = Color(0xFFECFDF5)    // Soft Mint highlight container
+val CleanEmeraldLight = CleanPrimaryLight
+val CleanPrimaryGlow = Color(0x2210B981)
 
-// Secondary & Telemetry Accents
-val NeonCyan = Color(0xFF00E5FF)
-val NeonCyanDark = Color(0xFF00B4D8)
-val NeonCyanMuted = Color(0x3300E5FF)
+// Typography & Content Hierarchies
+val TextPrimary = Color(0xFF0F172A)          // Slate Black for High Contrast
+val TextSecondary = Color(0xFF64748B)        // Neutral Slate Grey for Subtitles
+val TextTertiary = Color(0xFF94A3B8)         // Muted Grey for Inactive States
+val TextDisabled = Color(0xFFCBD5E1)
 
-val NeonPurple = Color(0xFFA855F7)
-val NeonPurpleDark = Color(0xFF7928CA)
-val NeonPurpleMuted = Color(0x33A855F7)
+// Functional Category Accents (Harmonious Modern Pastels)
+val CleanBlue = Color(0xFF2563EB)            // Royal Blue for Cardio / Stride
+val CleanBlueLight = Color(0xFFEFF6FF)
+val CleanPurple = Color(0xFF8B5CF6)          // Mind / Personality
+val CleanPurpleLight = Color(0xFFF5F3FF)
+val CleanAmber = Color(0xFFD97706)           // Warm Amber Streak / Warning
+val CleanAmberLight = Color(0xFFFEF3C7)
+val CleanCrimson = Color(0xFFEF4444)         // High-Intensity / Error
+val CleanCrimsonLight = Color(0xFFFEE2E2)
 
-val NeonAmber = Color(0xFFFFB703)
-val NeonCrimson = Color(0xFFFF2E63)
+// Backward-compatible semantic bindings for existing composable references
+val VoidBlack = Color(0xFF0F172A)
+val CyberBackground = CleanBackground
+val CyberSurface = CleanCard
+val CyberSurfaceVariant = CleanCardVariant
+val CyberCardBorder = CleanBorder
+val CyberCardElevated = CleanCard
 
-// High-Contrast Typography & Indicators
-val TextPrimary = Color(0xFFF8FAFC)
-val TextSecondary = Color(0xFF94A3B8)
-val TextTertiary = Color(0xFF64748B)
-val TextDisabled = Color(0xFF475569)
+val NeonGreen = CleanPrimary
+val NeonGreenBright = CleanPrimary
+val NeonGreenDark = CleanPrimaryDark
+val NeonGreenMuted = CleanPrimaryLight
+val NeonGreenGlow = CleanPrimaryGlow
 
+val NeonCyan = CleanBlue
+val NeonCyanDark = Color(0xFF1D4ED8)
+val NeonCyanMuted = CleanBlueLight
 
+val NeonPurple = CleanPurple
+val NeonPurpleDark = Color(0xFF7C3AED)
+val NeonPurpleMuted = CleanPurpleLight
+
+val NeonAmber = CleanAmber
+val NeonCrimson = CleanCrimson

@@ -47,8 +47,8 @@ fun MindScreen(
   ) {
     item {
       RebornTopHeader(
-        title = "MIND FORTRESS",
-        subtitle = "FOCUS, CONFIDENCE, MEDITATION & JOURNALING"
+        title = "Mind & Focus",
+        subtitle = "Meditation, focus, confidence & daily reflection"
       )
     }
 
@@ -56,14 +56,14 @@ fun MindScreen(
     item {
       CyberCard(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-        borderColor = NeonPurple.copy(alpha = 0.4f)
+        borderColor = CleanBorder
       ) {
         Text(
           text = "TODAY'S MENTAL STATE",
           fontSize = 11.sp,
           fontWeight = FontWeight.Bold,
-          color = NeonPurple,
-          letterSpacing = 1.sp
+          color = TextSecondary,
+          letterSpacing = 0.5.sp
         )
         Spacer(modifier = Modifier.height(10.dp))
         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -71,10 +71,10 @@ fun MindScreen(
             val isSelected = mood.equals(m, ignoreCase = true)
             Surface(
               shape = RoundedCornerShape(10.dp),
-              color = if (isSelected) NeonPurple.copy(alpha = 0.25f) else CyberSurfaceVariant,
+              color = if (isSelected) CleanPrimary.copy(alpha = 0.15f) else CleanCardVariant,
               border = androidx.compose.foundation.BorderStroke(
                 1.dp,
-                if (isSelected) NeonPurple else CyberCardBorder
+                if (isSelected) CleanPrimary else CleanBorder
               ),
               modifier = Modifier.clickable { mood = m }
             ) {
@@ -82,7 +82,7 @@ fun MindScreen(
                 text = m,
                 fontSize = 12.sp,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                color = if (isSelected) NeonPurple else TextSecondary,
+                color = if (isSelected) CleanPrimary else TextSecondary,
                 modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
               )
             }
@@ -95,19 +95,19 @@ fun MindScreen(
     item {
       CyberCard(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-        borderColor = CyberCardBorder
+        borderColor = CleanBorder
       ) {
         Row(
           modifier = Modifier.fillMaxWidth(),
           horizontalArrangement = Arrangement.SpaceBetween,
           verticalAlignment = Alignment.CenterVertically
         ) {
-          Text(text = "FOCUS LEVEL (1 - 10)", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+          Text(text = "Focus Level (1 - 10)", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = TextPrimary)
           Text(
             text = "${focusScore.toInt()} / 10",
             fontSize = 14.sp,
-            fontWeight = FontWeight.Black,
-            color = NeonCyan
+            fontWeight = FontWeight.Bold,
+            color = CleanPrimary
           )
         }
         Slider(
@@ -115,7 +115,11 @@ fun MindScreen(
           onValueChange = { focusScore = it },
           valueRange = 1f..10f,
           steps = 8,
-          colors = SliderDefaults.colors(thumbColor = NeonCyan, activeTrackColor = NeonCyan)
+          colors = SliderDefaults.colors(
+            thumbColor = CleanPrimary,
+            activeTrackColor = CleanPrimary,
+            inactiveTrackColor = CleanBorder
+          )
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -125,12 +129,12 @@ fun MindScreen(
           horizontalArrangement = Arrangement.SpaceBetween,
           verticalAlignment = Alignment.CenterVertically
         ) {
-          Text(text = "CONFIDENCE LEVEL (1 - 10)", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+          Text(text = "Confidence Level (1 - 10)", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = TextPrimary)
           Text(
             text = "${confidenceScore.toInt()} / 10",
             fontSize = 14.sp,
-            fontWeight = FontWeight.Black,
-            color = NeonPurple
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF0284C7)
           )
         }
         Slider(
@@ -138,7 +142,11 @@ fun MindScreen(
           onValueChange = { confidenceScore = it },
           valueRange = 1f..10f,
           steps = 8,
-          colors = SliderDefaults.colors(thumbColor = NeonPurple, activeTrackColor = NeonPurple)
+          colors = SliderDefaults.colors(
+            thumbColor = Color(0xFF0284C7),
+            activeTrackColor = Color(0xFF0284C7),
+            inactiveTrackColor = CleanBorder
+          )
         )
       }
     }
@@ -147,7 +155,7 @@ fun MindScreen(
     item {
       CyberCard(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-        borderColor = CyberCardBorder
+        borderColor = CleanBorder
       ) {
         Row(
           modifier = Modifier.fillMaxWidth(),
@@ -175,27 +183,27 @@ fun MindScreen(
     item {
       CyberCard(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-        borderColor = CyberCardBorder
+        borderColor = CleanBorder
       ) {
-        Text(text = "DAILY JOURNALING & LOG", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = NeonCyan)
+        Text(text = "Daily Journaling", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
           value = journalText,
           onValueChange = { journalText = it },
-          placeholder = { Text("What did you conquer today? Any internal resistance?", color = TextTertiary, fontSize = 12.sp) },
+          placeholder = { Text("What did you conquer today? Any internal thoughts?", color = TextSecondary, fontSize = 12.sp) },
           modifier = Modifier.fillMaxWidth(),
           minLines = 3,
           shape = RoundedCornerShape(12.dp)
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(14.dp))
 
-        Text(text = "DAILY SELF-REFLECTION", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = NeonPurple)
+        Text(text = "Daily Self-Reflection", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
           value = reflectionText,
           onValueChange = { reflectionText = it },
-          placeholder = { Text("How was your eye contact, discipline, and presence?", color = TextTertiary, fontSize = 12.sp) },
+          placeholder = { Text("Discipline, presence, and personal growth notes...", color = TextSecondary, fontSize = 12.sp) },
           modifier = Modifier.fillMaxWidth(),
           minLines = 2,
           shape = RoundedCornerShape(12.dp)
@@ -221,12 +229,12 @@ fun MindScreen(
               )
             )
           },
-          colors = ButtonDefaults.buttonColors(containerColor = NeonPurple, contentColor = Color.White),
+          colors = ButtonDefaults.buttonColors(containerColor = CleanPrimary, contentColor = Color.White),
           modifier = Modifier.fillMaxWidth(),
           shape = RoundedCornerShape(12.dp),
           contentPadding = PaddingValues(vertical = 12.dp)
         ) {
-          Text("SAVE MIND FORTRESS (+30 XP)", fontWeight = FontWeight.Black, fontSize = 13.sp)
+          Text("SAVE MIND LOG", fontWeight = FontWeight.Bold, fontSize = 13.sp)
         }
       }
     }

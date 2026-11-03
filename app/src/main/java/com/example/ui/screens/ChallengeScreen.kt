@@ -56,8 +56,8 @@ fun ChallengeScreen(
   ) {
     item {
       RebornTopHeader(
-        title = "30-DAY PROTOCOL",
-        subtitle = "SELECT A DAY TO VIEW AND EXECUTE MISSIONS"
+        title = "30-Day Transformation",
+        subtitle = "Daily habit schedule and progress tracking"
       )
     }
 
@@ -75,19 +75,20 @@ fun ChallengeScreen(
           Surface(
             shape = RoundedCornerShape(12.dp),
             color = when {
-              isSelected -> NeonCyan.copy(alpha = 0.2f)
-              isCompletedDay -> NeonGreen.copy(alpha = 0.15f)
-              else -> CyberSurface
+              isSelected -> CleanPrimary
+              isCompletedDay -> CleanPrimaryLight
+              else -> CleanCard
             },
             border = androidx.compose.foundation.BorderStroke(
               1.dp,
               when {
-                isSelected -> NeonCyan
-                isCompletedDay -> NeonGreen
-                isMilestone -> NeonAmber
-                else -> CyberCardBorder
+                isSelected -> CleanPrimaryDark
+                isCompletedDay -> CleanPrimary
+                isMilestone -> CleanAmber
+                else -> CleanBorder
               }
             ),
+            shadowElevation = if (isSelected) 2.dp else 1.dp,
             modifier = Modifier
               .clickable { viewModel.selectChallengeDay(day) }
           ) {
@@ -96,24 +97,24 @@ fun ChallengeScreen(
               horizontalAlignment = Alignment.CenterHorizontally
             ) {
               if (isMilestone) {
-                Text(text = "👑", fontSize = 10.sp)
+                Text(text = "⭐", fontSize = 10.sp)
               }
               Text(
-                text = "DAY $day",
+                text = "Day $day",
                 fontSize = 12.sp,
-                fontWeight = if (isSelected) FontWeight.Black else FontWeight.Bold,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                 color = when {
-                  isSelected -> NeonCyan
-                  isCompletedDay -> NeonGreen
-                  else -> TextSecondary
+                  isSelected -> Color.White
+                  isCompletedDay -> CleanPrimaryDark
+                  else -> TextPrimary
                 }
               )
               if (isCompletedDay) {
                 Text(
-                  text = "DONE",
+                  text = "Done",
                   fontSize = 9.sp,
                   fontWeight = FontWeight.Bold,
-                  color = NeonGreen
+                  color = if (isSelected) Color.White else CleanPrimaryDark
                 )
               }
             }
@@ -126,7 +127,7 @@ fun ChallengeScreen(
     item {
       CyberCard(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-        borderColor = if (isBossMilestone) NeonAmber else CyberCardBorder
+        borderColor = CleanBorder
       ) {
         Row(
           modifier = Modifier.fillMaxWidth(),
@@ -136,30 +137,30 @@ fun ChallengeScreen(
           Column {
             Row(verticalAlignment = Alignment.CenterVertically) {
               Text(
-                text = "DAY $selectedDay OBJECTIVES",
+                text = "Day $selectedDay Objectives",
                 fontSize = 18.sp,
-                fontWeight = FontWeight.Black,
+                fontWeight = FontWeight.Bold,
                 color = TextPrimary
               )
               if (isBossMilestone) {
                 Spacer(modifier = Modifier.width(8.dp))
                 Surface(
                   shape = RoundedCornerShape(6.dp),
-                  color = NeonAmber.copy(alpha = 0.2f),
-                  border = androidx.compose.foundation.BorderStroke(1.dp, NeonAmber)
+                  color = CleanAmberLight,
+                  border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFDE68A))
                 ) {
                   Text(
-                    text = "BOSS MILESTONE",
+                    text = "MILESTONE",
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
-                    color = NeonAmber,
+                    color = CleanAmber,
                     modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                   )
                 }
               }
             }
             Text(
-              text = "$completedDayCount / $totalDayCount missions completed",
+              text = "$completedDayCount of $totalDayCount missions completed",
               fontSize = 12.sp,
               color = TextSecondary
             )
@@ -170,15 +171,15 @@ fun ChallengeScreen(
             modifier = Modifier
               .size(46.dp)
               .clip(CircleShape)
-              .background(CyberSurfaceVariant)
-              .border(2.dp, if (dayRatio >= 1f) NeonGreen else NeonCyan, CircleShape),
+              .background(if (dayRatio >= 1f) CleanPrimaryLight else CleanCardVariant)
+              .border(2.dp, if (dayRatio >= 1f) CleanPrimary else CleanBorderHover, CircleShape),
             contentAlignment = Alignment.Center
           ) {
             Text(
               text = "${(dayRatio * 100).toInt()}%",
               fontSize = 12.sp,
-              fontWeight = FontWeight.Black,
-              color = if (dayRatio >= 1f) NeonGreen else NeonCyan
+              fontWeight = FontWeight.Bold,
+              color = if (dayRatio >= 1f) CleanPrimaryDark else TextPrimary
             )
           }
         }
@@ -197,9 +198,9 @@ fun ChallengeScreen(
             onClick = { activeCategoryFilter = null },
             label = { Text("All Categories") },
             colors = FilterChipDefaults.filterChipColors(
-              selectedContainerColor = NeonCyan.copy(alpha = 0.2f),
-              selectedLabelColor = NeonCyan,
-              containerColor = CyberSurface,
+              selectedContainerColor = CleanPrimaryLight,
+              selectedLabelColor = CleanPrimaryDark,
+              containerColor = CleanCard,
               labelColor = TextSecondary
             )
           )
@@ -212,9 +213,9 @@ fun ChallengeScreen(
             },
             label = { Text(category.label) },
             colors = FilterChipDefaults.filterChipColors(
-              selectedContainerColor = Color(category.badgeColor).copy(alpha = 0.2f),
-              selectedLabelColor = Color(category.badgeColor),
-              containerColor = CyberSurface,
+              selectedContainerColor = CleanPrimaryLight,
+              selectedLabelColor = CleanPrimaryDark,
+              containerColor = CleanCard,
               labelColor = TextSecondary
             )
           )
@@ -247,11 +248,12 @@ fun DetailedMissionCard(
 
   Surface(
     shape = RoundedCornerShape(14.dp),
-    color = if (mission.isCompleted) Color(0xFF0F1E1B) else CyberSurface,
+    color = if (mission.isCompleted) CleanPrimaryLight else CleanCard,
     border = androidx.compose.foundation.BorderStroke(
       1.dp,
-      if (mission.isCompleted) NeonGreen.copy(alpha = 0.45f) else CyberCardBorder
+      if (mission.isCompleted) CleanPrimary.copy(alpha = 0.4f) else CleanBorder
     ),
+    shadowElevation = if (mission.isCompleted) 0.dp else 1.dp,
     modifier = Modifier
       .fillMaxWidth()
       .clickable { onToggle() }
@@ -264,26 +266,26 @@ fun DetailedMissionCard(
       ) {
         Surface(
           shape = RoundedCornerShape(6.dp),
-          color = Color(mission.category.badgeColor).copy(alpha = 0.15f)
+          color = CleanCardVariant
         ) {
           Text(
             text = mission.category.label.uppercase(),
             fontSize = 10.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(mission.category.badgeColor),
+            color = TextSecondary,
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
           )
         }
 
         Surface(
           shape = RoundedCornerShape(8.dp),
-          color = NeonCyan.copy(alpha = 0.15f)
+          color = CleanPrimaryLight
         ) {
           Text(
-            text = "+${mission.xpReward} XP",
+            text = "+${mission.xpReward} pts",
             fontSize = 11.sp,
-            fontWeight = FontWeight.Black,
-            color = NeonCyan,
+            fontWeight = FontWeight.Bold,
+            color = CleanPrimaryDark,
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
           )
         }
@@ -299,10 +301,10 @@ fun DetailedMissionCard(
           modifier = Modifier
             .size(24.dp)
             .clip(RoundedCornerShape(6.dp))
-            .background(if (mission.isCompleted) NeonGreen else Color.Transparent)
+            .background(if (mission.isCompleted) CleanPrimary else Color.Transparent)
             .border(
               1.5.dp,
-              if (mission.isCompleted) NeonGreen else TextTertiary,
+              if (mission.isCompleted) CleanPrimary else CleanBorderHover,
               RoundedCornerShape(6.dp)
             ),
           contentAlignment = Alignment.Center
@@ -311,7 +313,7 @@ fun DetailedMissionCard(
             Icon(
               imageVector = Icons.Default.Check,
               contentDescription = "Done",
-              tint = VoidBlack,
+              tint = Color.White,
               modifier = Modifier.size(16.dp)
             )
           }

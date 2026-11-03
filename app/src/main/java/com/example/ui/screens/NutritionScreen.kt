@@ -73,8 +73,8 @@ fun NutritionScreen(
   ) {
     item {
       RebornTopHeader(
-        title = "NUTRITION & FUEL",
-        subtitle = "INDIAN MEAL LOGGING & HYDRATION TRACKER"
+        title = "Nutrition & Diet",
+        subtitle = "Indian meal logging & water intake"
       )
     }
 
@@ -82,7 +82,7 @@ fun NutritionScreen(
     item {
       CyberCard(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-        borderColor = NeonCyan.copy(alpha = 0.4f)
+        borderColor = CleanBorder
       ) {
         Row(
           modifier = Modifier.fillMaxWidth(),
@@ -94,20 +94,20 @@ fun NutritionScreen(
               text = "TOTAL DAILY INTAKE",
               fontSize = 11.sp,
               fontWeight = FontWeight.Bold,
-              color = NeonCyan,
-              letterSpacing = 1.sp
+              color = TextSecondary,
+              letterSpacing = 0.5.sp
             )
             Text(
               text = "$totalCalories kcal",
               fontSize = 24.sp,
-              fontWeight = FontWeight.Black,
+              fontWeight = FontWeight.Bold,
               color = TextPrimary
             )
             Text(
               text = "Estimated Protein: %.1f g".format(totalProtein),
               fontSize = 13.sp,
-              fontWeight = FontWeight.Bold,
-              color = NeonGreen
+              fontWeight = FontWeight.SemiBold,
+              color = CleanPrimary
             )
           }
 
@@ -116,8 +116,8 @@ fun NutritionScreen(
             Text(
               text = "${nutrition.waterMl} / ${user.dailyWaterTargetMl} ml",
               fontSize = 15.sp,
-              fontWeight = FontWeight.ExtraBold,
-              color = NeonCyan
+              fontWeight = FontWeight.Bold,
+              color = CleanPrimary
             )
           }
         }
@@ -131,23 +131,23 @@ fun NutritionScreen(
         ) {
           Button(
             onClick = { viewModel.addWater(250) },
-            colors = ButtonDefaults.buttonColors(containerColor = NeonCyan.copy(alpha = 0.2f), contentColor = NeonCyan),
+            colors = ButtonDefaults.buttonColors(containerColor = CleanPrimary.copy(alpha = 0.12f), contentColor = CleanPrimary),
             modifier = Modifier.weight(1f),
             shape = RoundedCornerShape(8.dp)
           ) {
-            Text("+250ml", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+            Text("+250ml", fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
           }
           Button(
             onClick = { viewModel.addWater(500) },
-            colors = ButtonDefaults.buttonColors(containerColor = NeonCyan.copy(alpha = 0.2f), contentColor = NeonCyan),
+            colors = ButtonDefaults.buttonColors(containerColor = CleanPrimary.copy(alpha = 0.12f), contentColor = CleanPrimary),
             modifier = Modifier.weight(1f),
             shape = RoundedCornerShape(8.dp)
           ) {
-            Text("+500ml", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+            Text("+500ml", fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
           }
           Button(
             onClick = { viewModel.addWater(-250) },
-            colors = ButtonDefaults.buttonColors(containerColor = CyberSurfaceVariant, contentColor = TextSecondary),
+            colors = ButtonDefaults.buttonColors(containerColor = CleanCardVariant, contentColor = TextSecondary),
             shape = RoundedCornerShape(8.dp)
           ) {
             Text("-250", fontSize = 12.sp)
@@ -160,12 +160,12 @@ fun NutritionScreen(
     item {
       Column(modifier = Modifier.padding(vertical = 8.dp)) {
         Text(
-          text = "INDIAN FUEL SUGGESTIONS (TAP TO ADD TO LUNCH)",
+          text = "INDIAN MEAL SUGGESTIONS (TAP TO ADD TO LUNCH)",
           fontSize = 11.sp,
           fontWeight = FontWeight.Bold,
           color = TextSecondary,
           modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-          letterSpacing = 1.sp
+          letterSpacing = 0.5.sp
         )
         LazyRow(
           contentPadding = PaddingValues(horizontal = 16.dp),
@@ -174,16 +174,16 @@ fun NutritionScreen(
           items(indianSuggestions) { item ->
             Surface(
               shape = RoundedCornerShape(10.dp),
-              color = CyberSurface,
-              border = androidx.compose.foundation.BorderStroke(1.dp, CyberCardBorder),
+              color = CleanCard,
+              border = androidx.compose.foundation.BorderStroke(1.dp, CleanBorder),
               modifier = Modifier.clickable {
                 viewModel.logMeal("Lunch", item)
               }
             ) {
               Column(modifier = Modifier.padding(10.dp)) {
-                Text(text = item.name, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                Text(text = item.name, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = TextPrimary)
                 Spacer(modifier = Modifier.height(2.dp))
-                Text(text = "${item.calories} kcal • ${item.proteinGrams}g pro", fontSize = 10.sp, color = NeonGreen)
+                Text(text = "${item.calories} kcal • ${item.proteinGrams}g pro", fontSize = 10.sp, fontWeight = FontWeight.Medium, color = CleanPrimary)
               }
             }
           }
@@ -230,7 +230,7 @@ fun MealSectionCard(
 ) {
   CyberCard(
     modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-    borderColor = CyberCardBorder
+    borderColor = CleanBorder
   ) {
     Row(
       modifier = Modifier.fillMaxWidth(),
@@ -238,14 +238,13 @@ fun MealSectionCard(
       verticalAlignment = Alignment.CenterVertically
     ) {
       Text(
-        text = mealName.uppercase(),
-        fontSize = 14.sp,
-        fontWeight = FontWeight.Black,
-        color = NeonCyan,
-        letterSpacing = 1.sp
+        text = mealName,
+        fontSize = 15.sp,
+        fontWeight = FontWeight.Bold,
+        color = TextPrimary
       )
       IconButton(onClick = onAddItem) {
-        Icon(Icons.Default.AddCircle, contentDescription = "Add Item", tint = NeonGreen)
+        Icon(Icons.Default.AddCircle, contentDescription = "Add Item", tint = CleanPrimary)
       }
     }
 
@@ -253,7 +252,7 @@ fun MealSectionCard(
       Text(
         text = "No items recorded. Tap '+' or choose from suggestions above.",
         fontSize = 12.sp,
-        color = TextTertiary,
+        color = TextSecondary,
         modifier = Modifier.padding(vertical = 4.dp)
       )
     } else {
@@ -273,7 +272,7 @@ fun MealSectionCard(
             onClick = { onRemoveItem(idx) },
             modifier = Modifier.size(24.dp)
           ) {
-            Icon(Icons.Default.Close, contentDescription = "Delete", tint = TextTertiary, modifier = Modifier.size(16.dp))
+            Icon(Icons.Default.Close, contentDescription = "Delete", tint = TextSecondary, modifier = Modifier.size(16.dp))
           }
         }
       }
@@ -327,7 +326,7 @@ fun AddCustomMealDialog(
             onSave(name, cal, pro)
           }
         },
-        colors = ButtonDefaults.buttonColors(containerColor = NeonGreen, contentColor = VoidBlack)
+        colors = ButtonDefaults.buttonColors(containerColor = CleanPrimary, contentColor = Color.White)
       ) {
         Text("Log Food")
       }
@@ -335,6 +334,6 @@ fun AddCustomMealDialog(
     dismissButton = {
       TextButton(onClick = onDismiss) { Text("Cancel", color = TextSecondary) }
     },
-    containerColor = CyberSurface
+    containerColor = CleanCard
   )
 }

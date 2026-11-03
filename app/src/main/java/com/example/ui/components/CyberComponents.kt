@@ -1,6 +1,7 @@
 package com.example.ui.components
 
 import androidx.compose.animation.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,10 +15,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.theme.*
@@ -26,7 +28,8 @@ import com.example.ui.viewmodel.AppScreen
 @Composable
 fun CyberCard(
   modifier: Modifier = Modifier,
-  borderColor: Color = CyberCardBorder,
+  borderColor: Color = CleanBorder,
+  backgroundColor: Color = CleanCard,
   content: @Composable ColumnScope.() -> Unit
 ) {
   Card(
@@ -34,7 +37,8 @@ fun CyberCard(
       .fillMaxWidth()
       .border(1.dp, borderColor, RoundedCornerShape(16.dp)),
     shape = RoundedCornerShape(16.dp),
-    colors = CardDefaults.cardColors(containerColor = CyberSurface)
+    colors = CardDefaults.cardColors(containerColor = backgroundColor),
+    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
   ) {
     Column(
       modifier = Modifier
@@ -46,87 +50,47 @@ fun CyberCard(
 }
 
 @Composable
-fun XpProgressBar(
-  level: Int,
-  currentXp: Int,
-  xpToNextLevel: Int,
-  rankTitle: String,
-  modifier: Modifier = Modifier
+fun CircularWorkoutProgress(
+  percentage: Int,
+  modifier: Modifier = Modifier,
+  size: Dp = 72.dp,
+  strokeWidth: Dp = 6.dp,
+  label: String? = null
 ) {
-  val progress = (currentXp.toFloat() / xpToNextLevel.coerceAtLeast(1).toFloat()).coerceIn(0f, 1f)
-  CyberCard(
-    modifier = modifier,
-    borderColor = NeonGreen.copy(alpha = 0.5f)
+  val cleanProgress = (percentage / 100f).coerceIn(0f, 1f)
+  Box(
+    modifier = modifier.size(size),
+    contentAlignment = Alignment.Center
   ) {
-    Row(
-      modifier = Modifier.fillMaxWidth(),
-      horizontalArrangement = Arrangement.SpaceBetween,
-      verticalAlignment = Alignment.CenterVertically
-    ) {
-      Row(verticalAlignment = Alignment.CenterVertically) {
-        Box(
-          modifier = Modifier
-            .size(44.dp)
-            .clip(CircleShape)
-            .background(
-              Brush.linearGradient(
-                listOf(NeonGreen, NeonGreenBright)
-              )
-            ),
-          contentAlignment = Alignment.Center
-        ) {
-          Text(
-            text = "LV.$level",
-            fontWeight = FontWeight.Black,
-            fontSize = 13.sp,
-            color = VoidBlack
-          )
-        }
-        Spacer(modifier = Modifier.width(12.dp))
-        Column {
-          Text(
-            text = rankTitle,
-            fontWeight = FontWeight.Bold,
-            fontSize = 16.sp,
-            color = TextPrimary
-          )
-          Text(
-            text = "RANK STATUS: ACTIVE",
-            fontSize = 11.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = NeonGreen
-          )
-        }
-      }
+    CircularProgressIndicator(
+      progress = { 1f },
+      modifier = Modifier.fillMaxSize(),
+      color = Color(0xFFE2E8F0),
+      strokeWidth = strokeWidth,
+      strokeCap = StrokeCap.Round
+    )
+    CircularProgressIndicator(
+      progress = { cleanProgress },
+      modifier = Modifier.fillMaxSize(),
+      color = CleanPrimary,
+      strokeWidth = strokeWidth,
+      strokeCap = StrokeCap.Round
+    )
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
       Text(
-        text = "$currentXp / $xpToNextLevel XP",
+        text = "$percentage%",
+        fontSize = if (size > 60.dp) 15.sp else 12.sp,
         fontWeight = FontWeight.Bold,
-        fontSize = 13.sp,
-        color = NeonGreen
+        color = TextPrimary
       )
-    }
-
-    Spacer(modifier = Modifier.height(12.dp))
-
-    // Segmented neon progress bar
-    Box(
-      modifier = Modifier
-        .fillMaxWidth()
-        .height(10.dp)
-        .clip(RoundedCornerShape(5.dp))
-        .background(Color(0xFF1E2433))
-    ) {
-      Box(
-        modifier = Modifier
-          .fillMaxHeight()
-          .fillMaxWidth(progress)
-          .clip(RoundedCornerShape(5.dp))
-          .background(
-            Brush.horizontalGradient(
-              listOf(NeonGreen, NeonGreenBright)
-            )
-          )
-      )
+      if (label != null) {
+        Text(
+          text = label,
+          fontSize = 9.sp,
+          fontWeight = FontWeight.Medium,
+          color = TextSecondary
+        )
+      }
     }
   }
 }
@@ -145,9 +109,10 @@ fun MetricHudTile(
     modifier = modifier
       .clip(RoundedCornerShape(16.dp))
       .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)
-      .border(1.dp, accentColor.copy(alpha = 0.35f), RoundedCornerShape(16.dp)),
+      .border(1.dp, CleanBorder, RoundedCornerShape(16.dp)),
     shape = RoundedCornerShape(16.dp),
-    colors = CardDefaults.cardColors(containerColor = CyberSurface)
+    colors = CardDefaults.cardColors(containerColor = CleanCard),
+    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
   ) {
     Column(
       modifier = Modifier
@@ -164,18 +129,18 @@ fun MetricHudTile(
           fontSize = 11.sp,
           fontWeight = FontWeight.Bold,
           color = TextSecondary,
-          letterSpacing = 0.8.sp
+          letterSpacing = 0.5.sp
         )
         Box(
           modifier = Modifier
             .size(32.dp)
-            .clip(CircleShape)
-            .background(accentColor.copy(alpha = 0.15f)),
+            .clip(RoundedCornerShape(8.dp))
+            .background(accentColor.copy(alpha = 0.12f)),
           contentAlignment = Alignment.Center
         ) {
           Icon(
             imageVector = icon,
-            contentDescription = title,
+            contentDescription = null,
             tint = accentColor,
             modifier = Modifier.size(18.dp)
           )
@@ -185,13 +150,14 @@ fun MetricHudTile(
       Text(
         text = value,
         fontSize = 20.sp,
-        fontWeight = FontWeight.ExtraBold,
+        fontWeight = FontWeight.Bold,
         color = TextPrimary
       )
+      Spacer(modifier = Modifier.height(2.dp))
       Text(
         text = subtitle,
-        fontSize = 11.sp,
-        color = accentColor,
+        fontSize = 12.sp,
+        color = TextSecondary,
         fontWeight = FontWeight.Medium
       )
     }
@@ -206,31 +172,40 @@ fun RebornBottomNavigation(
 ) {
   val primaryScreens = listOf(
     AppScreen.HOME to Icons.Default.Home,
-    AppScreen.CHALLENGE to Icons.Default.Flag,
-    AppScreen.WORKOUT to Icons.Default.FitnessCenter,
-    AppScreen.WALKING to Icons.Default.DirectionsWalk,
-    AppScreen.NUTRITION to Icons.Default.Restaurant,
-    AppScreen.SETTINGS to Icons.Default.Person
+    AppScreen.PLAN to Icons.Default.EventNote,
+    AppScreen.ACTIVITY to Icons.Default.DirectionsWalk,
+    AppScreen.PROGRESS to Icons.Default.Insights,
+    AppScreen.PROFILE to Icons.Default.Person
   )
 
   Surface(
     modifier = modifier
       .fillMaxWidth()
       .windowInsetsPadding(WindowInsets.navigationBars),
-    color = VoidBlack,
-    tonalElevation = 8.dp,
-    border = androidx.compose.foundation.BorderStroke(1.dp, CyberCardBorder.copy(alpha = 0.6f))
+    color = CleanCard,
+    tonalElevation = 2.dp,
+    border = BorderStroke(1.dp, CleanBorder)
   ) {
     Row(
       modifier = Modifier
         .fillMaxWidth()
-        .padding(vertical = 6.dp, horizontal = 8.dp),
+        .padding(vertical = 6.dp, horizontal = 4.dp),
       horizontalArrangement = Arrangement.SpaceAround,
       verticalAlignment = Alignment.CenterVertically
     ) {
       primaryScreens.forEach { (screen, icon) ->
-        val isSelected = currentScreen == screen
-        val color = if (isSelected) NeonGreen else TextTertiary
+        val isSelected = when (screen) {
+          AppScreen.HOME -> currentScreen == AppScreen.HOME
+          AppScreen.PLAN -> currentScreen in listOf(AppScreen.PLAN, AppScreen.CHALLENGE, AppScreen.WORKOUT, AppScreen.EXERCISES)
+          AppScreen.ACTIVITY -> currentScreen in listOf(AppScreen.ACTIVITY, AppScreen.WALKING)
+          AppScreen.PROGRESS -> currentScreen == AppScreen.PROGRESS
+          AppScreen.PROFILE -> currentScreen in listOf(AppScreen.PROFILE, AppScreen.SETTINGS)
+          else -> currentScreen == screen
+        }
+
+        val color = if (isSelected) CleanPrimary else TextSecondary
+        val pillBg = if (isSelected) CleanPrimaryLight else Color.Transparent
+
         Column(
           modifier = Modifier
             .clip(RoundedCornerShape(12.dp))
@@ -242,7 +217,7 @@ fun RebornBottomNavigation(
             modifier = Modifier
               .size(32.dp)
               .clip(RoundedCornerShape(8.dp))
-              .background(if (isSelected) NeonGreen.copy(alpha = 0.15f) else Color.Transparent),
+              .background(pillBg),
             contentAlignment = Alignment.Center
           ) {
             Icon(
@@ -255,7 +230,7 @@ fun RebornBottomNavigation(
           Spacer(modifier = Modifier.height(2.dp))
           Text(
             text = screen.title,
-            fontSize = 10.sp,
+            fontSize = 11.sp,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
             color = color
           )
@@ -281,26 +256,27 @@ fun RebornTopHeader(
   ) {
     Column {
       Text(
-        text = title.uppercase(),
-        fontSize = 20.sp,
-        fontWeight = FontWeight.Black,
+        text = title,
+        fontSize = 22.sp,
+        fontWeight = FontWeight.Bold,
         color = TextPrimary,
-        letterSpacing = 1.sp
+        letterSpacing = 0.5.sp
       )
       if (subtitle != null) {
         Text(
           text = subtitle,
           fontSize = 12.sp,
-          color = TextSecondary
+          color = TextSecondary,
+          fontWeight = FontWeight.Medium
         )
       }
     }
 
-    if (streakDays != null) {
+    if (streakDays != null && streakDays > 0) {
       Surface(
         shape = RoundedCornerShape(20.dp),
-        color = CyberSurfaceVariant,
-        border = androidx.compose.foundation.BorderStroke(1.dp, NeonAmber.copy(alpha = 0.5f)),
+        color = CleanAmberLight,
+        border = BorderStroke(1.dp, Color(0xFFFDE68A)),
         modifier = Modifier
           .then(if (onStreakClick != null) Modifier.clickable { onStreakClick() } else Modifier)
       ) {
@@ -308,13 +284,13 @@ fun RebornTopHeader(
           modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
           verticalAlignment = Alignment.CenterVertically
         ) {
-          Text(text = "🔥", fontSize = 14.sp)
+          Text(text = "🔥", fontSize = 13.sp)
           Spacer(modifier = Modifier.width(4.dp))
           Text(
             text = "$streakDays DAYS",
             fontWeight = FontWeight.Bold,
             fontSize = 12.sp,
-            color = NeonAmber
+            color = CleanAmber
           )
         }
       }

@@ -23,10 +23,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ui.components.RebornBottomNavigation
 import com.example.ui.screens.*
-import com.example.ui.theme.CyberBackground
-import com.example.ui.theme.MyApplicationTheme
-import com.example.ui.theme.NeonGreen
-import com.example.ui.theme.VoidBlack
+import com.example.ui.theme.*
 import com.example.ui.viewmodel.AppScreen
 import com.example.ui.viewmodel.RebornViewModel
 
@@ -88,7 +85,7 @@ fun RebornApp(viewModel: RebornViewModel = viewModel()) {
 
   Scaffold(
     modifier = Modifier.fillMaxSize(),
-    containerColor = CyberBackground,
+    containerColor = CleanBackground,
     contentWindowInsets = WindowInsets.safeDrawing,
     bottomBar = {
       RebornBottomNavigation(
@@ -112,26 +109,38 @@ fun RebornApp(viewModel: RebornViewModel = viewModel()) {
           missions = missions,
           onNavigate = { screen -> viewModel.navigateTo(screen) }
         )
-        AppScreen.CHALLENGE -> ChallengeScreen(
+        AppScreen.PLAN, AppScreen.CHALLENGE, AppScreen.EXERCISES -> PlanScreen(
           viewModel = viewModel,
-          missions = missions,
           selectedDay = selectedDay
         )
-        AppScreen.EXERCISES -> ExercisesScreen(
-          viewModel = viewModel,
-          exercises = exercises
-        )
-        AppScreen.WORKOUT -> WorkoutScreen(
-          viewModel = viewModel,
-          activeWorkout = activeWorkout,
-          restSeconds = restSeconds,
-          weeklySchedule = weeklySchedule,
-          workoutHistory = workoutHistory
-        )
-        AppScreen.WALKING -> WalkingScreen(
+        AppScreen.WORKOUT -> if (activeWorkout != null) {
+          WorkoutScreen(
+            viewModel = viewModel,
+            activeWorkout = activeWorkout,
+            restSeconds = restSeconds,
+            weeklySchedule = weeklySchedule,
+            workoutHistory = workoutHistory
+          )
+        } else {
+          PlanScreen(
+            viewModel = viewModel,
+            selectedDay = selectedDay
+          )
+        }
+        AppScreen.ACTIVITY, AppScreen.WALKING -> ActivityScreen(
           viewModel = viewModel,
           user = userProfile,
           activities = walkingActivities
+        )
+        AppScreen.PROGRESS -> ProgressScreen(
+          viewModel = viewModel,
+          user = userProfile,
+          missions = missions
+        )
+        AppScreen.PROFILE, AppScreen.SETTINGS -> SettingsScreen(
+          viewModel = viewModel,
+          user = userProfile,
+          badges = achievements
         )
         AppScreen.NUTRITION -> NutritionScreen(
           viewModel = viewModel,
@@ -146,15 +155,6 @@ fun RebornApp(viewModel: RebornViewModel = viewModel()) {
           viewModel = viewModel,
           tasks = personalityTasks
         )
-        AppScreen.PROGRESS -> ProgressScreen(
-          user = userProfile,
-          missions = missions
-        )
-        AppScreen.SETTINGS -> SettingsScreen(
-          viewModel = viewModel,
-          user = userProfile,
-          badges = achievements
-        )
       }
 
       // Floating XP Level Up / Mission Notification Banner
@@ -168,21 +168,21 @@ fun RebornApp(viewModel: RebornViewModel = viewModel()) {
       ) {
         Surface(
           shape = RoundedCornerShape(20.dp),
-          color = VoidBlack,
-          border = androidx.compose.foundation.BorderStroke(1.5.dp, NeonGreen),
-          shadowElevation = 8.dp
+          color = CleanPrimary,
+          border = androidx.compose.foundation.BorderStroke(1.dp, CleanPrimaryDark),
+          shadowElevation = 4.dp
         ) {
           Row(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
           ) {
-            Text(text = "⚡", fontSize = 16.sp)
+            Text(text = "✨", fontSize = 16.sp)
             Spacer(modifier = Modifier.width(8.dp))
             Text(
               text = xpToast ?: "",
               fontSize = 12.sp,
-              fontWeight = FontWeight.Black,
-              color = NeonGreen
+              fontWeight = FontWeight.Bold,
+              color = Color.White
             )
           }
         }

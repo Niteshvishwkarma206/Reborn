@@ -54,8 +54,8 @@ fun ExercisesScreen(
     ) {
       item {
         RebornTopHeader(
-          title = "EXERCISE DATABASE",
-          subtitle = "TECHNIQUE, MODIFICATIONS & MUSCLE TARGETS"
+          title = "Exercise Library",
+          subtitle = "Technique, modifications & target muscles"
         )
       }
 
@@ -70,17 +70,17 @@ fun ExercisesScreen(
           OutlinedTextField(
             value = searchQuery,
             onValueChange = { searchQuery = it },
-            placeholder = { Text("Search exercises or muscles...", color = TextTertiary, fontSize = 13.sp) },
+            placeholder = { Text("Search exercises or muscles...", color = TextSecondary, fontSize = 13.sp) },
             leadingIcon = {
-              Icon(Icons.Default.Search, contentDescription = "Search", tint = NeonCyan)
+              Icon(Icons.Default.Search, contentDescription = "Search", tint = CleanPrimary)
             },
             modifier = Modifier.weight(1f),
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
-              focusedBorderColor = NeonCyan,
-              unfocusedBorderColor = CyberCardBorder,
-              focusedContainerColor = CyberSurface,
-              unfocusedContainerColor = CyberSurface,
+              focusedBorderColor = CleanPrimary,
+              unfocusedBorderColor = CleanBorder,
+              focusedContainerColor = CleanCard,
+              unfocusedContainerColor = CleanCard,
               focusedTextColor = TextPrimary,
               unfocusedTextColor = TextPrimary
             ),
@@ -94,10 +94,10 @@ fun ExercisesScreen(
             modifier = Modifier
               .size(52.dp)
               .clip(RoundedCornerShape(12.dp))
-              .background(NeonCyan.copy(alpha = 0.15f))
-              .border(1.dp, NeonCyan, RoundedCornerShape(12.dp))
+              .background(CleanPrimary.copy(alpha = 0.12f))
+              .border(1.dp, CleanPrimary.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
           ) {
-            Icon(Icons.Default.Add, contentDescription = "Add Custom Exercise", tint = NeonCyan)
+            Icon(Icons.Default.Add, contentDescription = "Add Custom Exercise", tint = CleanPrimary)
           }
         }
       }
@@ -112,25 +112,38 @@ fun ExercisesScreen(
             FilterChip(
               selected = selectedCategory == null,
               onClick = { selectedCategory = null },
-              label = { Text("All") },
+              label = { Text("All", fontWeight = if (selectedCategory == null) FontWeight.SemiBold else FontWeight.Normal) },
               colors = FilterChipDefaults.filterChipColors(
-                selectedContainerColor = NeonCyan.copy(alpha = 0.25f),
-                selectedLabelColor = NeonCyan,
-                containerColor = CyberSurface,
+                selectedContainerColor = CleanPrimary.copy(alpha = 0.15f),
+                selectedLabelColor = CleanPrimary,
+                containerColor = CleanCard,
                 labelColor = TextSecondary
+              ),
+              border = FilterChipDefaults.filterChipBorder(
+                borderColor = CleanBorder,
+                selectedBorderColor = CleanPrimary,
+                enabled = true,
+                selected = selectedCategory == null
               )
             )
           }
           items(ExerciseCategory.values()) { category ->
+            val isSelected = selectedCategory == category
             FilterChip(
-              selected = selectedCategory == category,
-              onClick = { selectedCategory = if (selectedCategory == category) null else category },
-              label = { Text(category.displayName) },
+              selected = isSelected,
+              onClick = { selectedCategory = if (isSelected) null else category },
+              label = { Text(category.displayName, fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal) },
               colors = FilterChipDefaults.filterChipColors(
-                selectedContainerColor = NeonCyan.copy(alpha = 0.25f),
-                selectedLabelColor = NeonCyan,
-                containerColor = CyberSurface,
+                selectedContainerColor = CleanPrimary.copy(alpha = 0.15f),
+                selectedLabelColor = CleanPrimary,
+                containerColor = CleanCard,
                 labelColor = TextSecondary
+              ),
+              border = FilterChipDefaults.filterChipBorder(
+                borderColor = CleanBorder,
+                selectedBorderColor = CleanPrimary,
+                enabled = true,
+                selected = isSelected
               )
             )
           }
@@ -152,8 +165,8 @@ fun ExercisesScreen(
     selectedExerciseDetail?.let { ex ->
       ModalBottomSheet(
         onDismissRequest = { selectedExerciseDetail = null },
-        containerColor = CyberSurface,
-        scrimColor = VoidBlack.copy(alpha = 0.7f)
+        containerColor = CleanCard,
+        scrimColor = Color.Black.copy(alpha = 0.35f)
       ) {
         ExerciseDetailContent(
           exercise = ex,
@@ -181,7 +194,7 @@ fun ExerciseCard(
 ) {
   CyberCard(
     modifier = Modifier.clickable { onClick() },
-    borderColor = CyberCardBorder
+    borderColor = CleanBorder
   ) {
     Row(
       modifier = Modifier.fillMaxWidth(),
@@ -197,23 +210,20 @@ fun ExerciseCard(
             color = TextPrimary
           )
           Spacer(modifier = Modifier.width(8.dp))
+          val (badgeBg, badgeText) = when (exercise.difficulty) {
+            Difficulty.BEGINNER -> Pair(Color(0xFFECFDF5), CleanPrimary)
+            Difficulty.INTERMEDIATE -> Pair(Color(0xFFEFF6FF), Color(0xFF2563EB))
+            Difficulty.ADVANCED -> Pair(Color(0xFFFEF2F2), Color(0xFFDC2626))
+          }
           Surface(
             shape = RoundedCornerShape(6.dp),
-            color = when (exercise.difficulty) {
-              Difficulty.BEGINNER -> NeonGreen.copy(alpha = 0.15f)
-              Difficulty.INTERMEDIATE -> NeonCyan.copy(alpha = 0.15f)
-              Difficulty.ADVANCED -> NeonCrimson.copy(alpha = 0.15f)
-            }
+            color = badgeBg
           ) {
             Text(
               text = exercise.difficulty.name,
               fontSize = 10.sp,
               fontWeight = FontWeight.Bold,
-              color = when (exercise.difficulty) {
-                Difficulty.BEGINNER -> NeonGreen
-                Difficulty.INTERMEDIATE -> NeonCyan
-                Difficulty.ADVANCED -> NeonCrimson
-              },
+              color = badgeText,
               modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
             )
           }
@@ -229,7 +239,7 @@ fun ExerciseCard(
       Icon(
         imageVector = Icons.Default.ChevronRight,
         contentDescription = "Details",
-        tint = NeonCyan
+        tint = TextSecondary
       )
     }
 
@@ -244,12 +254,12 @@ fun ExerciseCard(
         text = "⚡ ${exercise.defaultSetsReps}",
         fontSize = 12.sp,
         fontWeight = FontWeight.SemiBold,
-        color = NeonGreen
+        color = CleanPrimary
       )
       Text(
         text = "⏱️ ${exercise.restSeconds}s rest",
         fontSize = 12.sp,
-        color = TextTertiary
+        color = TextSecondary
       )
     }
   }
@@ -273,10 +283,10 @@ fun ExerciseDetailContent(
         verticalAlignment = Alignment.CenterVertically
       ) {
         Text(
-          text = exercise.name.uppercase(),
+          text = exercise.name,
           fontSize = 20.sp,
-          fontWeight = FontWeight.Black,
-          color = NeonCyan
+          fontWeight = FontWeight.Bold,
+          color = TextPrimary
         )
         IconButton(onClick = onClose) {
           Icon(Icons.Default.Close, contentDescription = "Close", tint = TextSecondary)
@@ -287,46 +297,47 @@ fun ExerciseDetailContent(
     item {
       Spacer(modifier = Modifier.height(8.dp))
       Surface(
-        shape = RoundedCornerShape(8.dp),
-        color = CyberSurfaceVariant
+        shape = RoundedCornerShape(12.dp),
+        color = CleanCardVariant,
+        border = androidx.compose.foundation.BorderStroke(1.dp, CleanBorder)
       ) {
-        Column(modifier = Modifier.padding(12.dp)) {
-          Text(text = "TARGET MUSCLES", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = TextTertiary)
+        Column(modifier = Modifier.padding(14.dp)) {
+          Text(text = "TARGET MUSCLES", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = TextSecondary)
           Text(text = exercise.targetMuscles, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
-          Spacer(modifier = Modifier.height(6.dp))
-          Text(text = "EQUIPMENT", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = TextTertiary)
-          Text(text = exercise.equipment, fontSize = 13.sp, color = NeonGreen)
+          Spacer(modifier = Modifier.height(8.dp))
+          Text(text = "EQUIPMENT", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = TextSecondary)
+          Text(text = exercise.equipment, fontSize = 13.sp, fontWeight = FontWeight.Medium, color = CleanPrimary)
         }
       }
     }
 
     item {
-      Spacer(modifier = Modifier.height(14.dp))
-      Text(text = "STEP-BY-STEP INSTRUCTIONS", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = NeonCyan)
-      Spacer(modifier = Modifier.height(6.dp))
+      Spacer(modifier = Modifier.height(16.dp))
+      Text(text = "Step-by-step Instructions", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+      Spacer(modifier = Modifier.height(8.dp))
       exercise.instructions.forEachIndexed { index, step ->
         Row(modifier = Modifier.padding(vertical = 4.dp)) {
-          Text(text = "${index + 1}. ", fontWeight = FontWeight.Bold, color = NeonCyan, fontSize = 13.sp)
-          Text(text = step, color = TextSecondary, fontSize = 13.sp, lineHeight = 18.sp)
+          Text(text = "${index + 1}. ", fontWeight = FontWeight.Bold, color = CleanPrimary, fontSize = 13.sp)
+          Text(text = step, color = TextSecondary, fontSize = 13.sp, lineHeight = 19.sp)
         }
       }
     }
 
     item {
       Spacer(modifier = Modifier.height(14.dp))
-      CyberCard(borderColor = NeonCrimson.copy(alpha = 0.35f)) {
-        Text(text = "⚠️ COMMON MISTAKES", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = NeonCrimson)
+      CyberCard(borderColor = Color(0xFFFCA5A5)) {
+        Text(text = "⚠️ Common Mistakes", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFFDC2626))
         Spacer(modifier = Modifier.height(4.dp))
-        Text(text = exercise.commonMistakes, fontSize = 12.sp, color = TextSecondary)
+        Text(text = exercise.commonMistakes, fontSize = 13.sp, color = TextSecondary)
       }
     }
 
     item {
       Spacer(modifier = Modifier.height(10.dp))
-      CyberCard(borderColor = NeonPurple.copy(alpha = 0.35f)) {
-        Text(text = "💡 BEGINNER MODIFICATION", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = NeonPurple)
+      CyberCard(borderColor = CleanBorder) {
+        Text(text = "💡 Beginner Modification", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = CleanPrimary)
         Spacer(modifier = Modifier.height(4.dp))
-        Text(text = exercise.beginnerModification, fontSize = 12.sp, color = TextSecondary)
+        Text(text = exercise.beginnerModification, fontSize = 13.sp, color = TextSecondary)
       }
     }
   }
@@ -375,7 +386,7 @@ fun CustomExerciseDialog(
             onCreate(name, targetMuscle, Difficulty.BEGINNER, setsReps)
           }
         },
-        colors = ButtonDefaults.buttonColors(containerColor = NeonCyan, contentColor = VoidBlack)
+        colors = ButtonDefaults.buttonColors(containerColor = CleanPrimary, contentColor = Color.White)
       ) {
         Text("Save Exercise")
       }
@@ -385,6 +396,6 @@ fun CustomExerciseDialog(
         Text("Cancel", color = TextSecondary)
       }
     },
-    containerColor = CyberSurface
+    containerColor = CleanCard
   )
 }

@@ -59,8 +59,8 @@ fun PersonalityScreen(
   ) {
     item {
       RebornTopHeader(
-        title = "PERSONALITY & CHARISMA",
-        subtitle = "PRESENCE, ASSERTION & SOCIAL MASTERY"
+        title = "Personality & Growth",
+        subtitle = "Presence, communication & social discipline"
       )
     }
 
@@ -68,7 +68,7 @@ fun PersonalityScreen(
     item {
       CyberCard(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-        borderColor = NeonCrimson.copy(alpha = 0.4f)
+        borderColor = CleanBorder
       ) {
         Row(
           modifier = Modifier.fillMaxWidth(),
@@ -77,29 +77,29 @@ fun PersonalityScreen(
         ) {
           Column {
             Text(
-              text = "CHARISMA & DISCIPLINE",
+              text = "GROWTH & DISCIPLINE",
               fontSize = 11.sp,
               fontWeight = FontWeight.Bold,
-              color = NeonCrimson,
-              letterSpacing = 1.sp
+              color = TextSecondary,
+              letterSpacing = 0.5.sp
             )
             Text(
-              text = "$completedCount / ${tasks.size} Drills Executed",
+              text = "$completedCount / ${tasks.size} Drills Completed",
               fontSize = 18.sp,
-              fontWeight = FontWeight.Black,
+              fontWeight = FontWeight.Bold,
               color = TextPrimary
             )
           }
 
           Surface(
             shape = RoundedCornerShape(8.dp),
-            color = NeonCrimson.copy(alpha = 0.15f)
+            color = Color(0xFFECFDF5)
           ) {
             Text(
               text = "+${completedCount * 40} XP EARNED",
               fontSize = 11.sp,
               fontWeight = FontWeight.Bold,
-              color = NeonCrimson,
+              color = CleanPrimary,
               modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
             )
           }
@@ -117,27 +117,40 @@ fun PersonalityScreen(
           FilterChip(
             selected = selectedDomain == null,
             onClick = { selectedDomain = null },
-            label = { Text("All Domains") },
+            label = { Text("All Domains", fontWeight = if (selectedDomain == null) FontWeight.SemiBold else FontWeight.Normal) },
             colors = FilterChipDefaults.filterChipColors(
-              selectedContainerColor = NeonCrimson.copy(alpha = 0.25f),
-              selectedLabelColor = NeonCrimson,
-              containerColor = CyberSurface,
+              selectedContainerColor = CleanPrimary.copy(alpha = 0.15f),
+              selectedLabelColor = CleanPrimary,
+              containerColor = CleanCard,
               labelColor = TextSecondary
+            ),
+            border = FilterChipDefaults.filterChipBorder(
+              borderColor = CleanBorder,
+              selectedBorderColor = CleanPrimary,
+              enabled = true,
+              selected = selectedDomain == null
             )
           )
         }
         items(domains) { domain ->
+          val isSelected = selectedDomain.equals(domain, ignoreCase = true)
           FilterChip(
-            selected = selectedDomain.equals(domain, ignoreCase = true),
+            selected = isSelected,
             onClick = {
-              selectedDomain = if (selectedDomain.equals(domain, ignoreCase = true)) null else domain
+              selectedDomain = if (isSelected) null else domain
             },
-            label = { Text(domain) },
+            label = { Text(domain, fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal) },
             colors = FilterChipDefaults.filterChipColors(
-              selectedContainerColor = NeonCrimson.copy(alpha = 0.25f),
-              selectedLabelColor = NeonCrimson,
-              containerColor = CyberSurface,
+              selectedContainerColor = CleanPrimary.copy(alpha = 0.15f),
+              selectedLabelColor = CleanPrimary,
+              containerColor = CleanCard,
               labelColor = TextSecondary
+            ),
+            border = FilterChipDefaults.filterChipBorder(
+              borderColor = CleanBorder,
+              selectedBorderColor = CleanPrimary,
+              enabled = true,
+              selected = isSelected
             )
           )
         }
@@ -163,7 +176,7 @@ fun PersonalityTaskCard(
 ) {
   CyberCard(
     modifier = Modifier.clickable { onToggle() },
-    borderColor = if (task.isCompleted) NeonGreen.copy(alpha = 0.4f) else CyberCardBorder
+    borderColor = if (task.isCompleted) CleanPrimary.copy(alpha = 0.5f) else CleanBorder
   ) {
     Row(
       modifier = Modifier.fillMaxWidth(),
@@ -173,16 +186,16 @@ fun PersonalityTaskCard(
         modifier = Modifier
           .size(24.dp)
           .clip(RoundedCornerShape(6.dp))
-          .background(if (task.isCompleted) NeonGreen else Color.Transparent)
+          .background(if (task.isCompleted) CleanPrimary else Color.Transparent)
           .border(
             1.5.dp,
-            if (task.isCompleted) NeonGreen else TextTertiary,
+            if (task.isCompleted) CleanPrimary else CleanBorder,
             RoundedCornerShape(6.dp)
           ),
         contentAlignment = Alignment.Center
       ) {
         if (task.isCompleted) {
-          Icon(Icons.Default.Check, contentDescription = null, tint = VoidBlack, modifier = Modifier.size(16.dp))
+          Icon(Icons.Default.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
         }
       }
 
@@ -196,13 +209,13 @@ fun PersonalityTaskCard(
         ) {
           Surface(
             shape = RoundedCornerShape(6.dp),
-            color = NeonPurple.copy(alpha = 0.15f)
+            color = CleanCardVariant
           ) {
             Text(
               text = task.domain.uppercase(),
               fontSize = 10.sp,
               fontWeight = FontWeight.Bold,
-              color = NeonPurple,
+              color = TextSecondary,
               modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
             )
           }
@@ -210,8 +223,8 @@ fun PersonalityTaskCard(
           Text(
             text = "+${task.xp} XP",
             fontSize = 11.sp,
-            fontWeight = FontWeight.Black,
-            color = NeonCyan
+            fontWeight = FontWeight.Bold,
+            color = CleanPrimary
           )
         }
 
@@ -229,7 +242,7 @@ fun PersonalityTaskCard(
         Text(
           text = task.instructions,
           fontSize = 12.sp,
-          color = TextTertiary,
+          color = TextSecondary,
           lineHeight = 17.sp
         )
       }

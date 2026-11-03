@@ -21,15 +21,13 @@ data class DailyMission(
 )
 
 enum class ExerciseCategory(val displayName: String) {
-  CHEST("Chest"),
-  BACK("Back"),
-  SHOULDERS("Shoulders"),
-  ARMS("Arms"),
+  FULL_BODY("Full Body"),
+  CHEST_ARMS("Chest & Arms"),
   LEGS("Legs"),
   CORE("Core"),
-  FULL_BODY("Full Body"),
+  MOBILITY("Mobility"),
   CARDIO("Cardio"),
-  MOBILITY("Mobility")
+  WARM_UP("Warm-up")
 }
 
 enum class Difficulty {
@@ -49,7 +47,63 @@ data class Exercise(
   val restSeconds: Int,
   val commonMistakes: String,
   val beginnerModification: String,
-  val equipment: String = "Bodyweight / None"
+  val equipment: String = "Bodyweight / None",
+  val videoUrl: String? = null
+)
+
+data class DailyWorkoutProgress(
+  val day: Int,
+  val date: String = "",
+  val workoutTitle: String = "",
+  val isRestDay: Boolean = false,
+  val totalExercises: Int = 0,
+  val completedExercises: Int = 0,
+  val completedExerciseIds: List<String> = emptyList(),
+  val percentage: Int = 0,
+  val isCompleted: Boolean = false,
+  val completedAt: Long? = null
+)
+
+data class DayWorkout(
+  val day: Int,
+  val title: String,
+  val focus: String, // "Strength", "Walking", "Mobility", "Recovery"
+  val isRestDay: Boolean = false,
+  val estimatedMinutes: Int = 25,
+  val exercises: List<Exercise> = emptyList()
+)
+
+data class DailyHabit(
+  val id: String,
+  val title: String,
+  val category: String,
+  val isCompleted: Boolean = false
+)
+
+enum class StepSource(val label: String) {
+  HEALTH_CONNECT("Health Connect"),
+  MANUAL("Manual Entry"),
+  NONE("No data recorded")
+}
+
+data class DailyStepCount(
+  val dayOfWeek: String,
+  val date: String,
+  val steps: Int,
+  val goal: Int,
+  val source: StepSource = StepSource.MANUAL
+)
+
+data class StepTrackerState(
+  val todaySteps: Int = 0,
+  val dailyGoal: Int = 8000,
+  val distanceKm: Float = 0f,
+  val source: StepSource = StepSource.NONE,
+  val isHealthConnectAvailable: Boolean = false,
+  val isPermissionGranted: Boolean = false,
+  val weeklyHistory: List<DailyStepCount> = emptyList(),
+  val isLoading: Boolean = false,
+  val errorMessage: String? = null
 )
 
 data class WorkoutSet(

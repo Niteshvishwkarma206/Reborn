@@ -1,38 +1,38 @@
 package com.example.ui.theme
 
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-val RebornDarkColorScheme = darkColorScheme(
-  primary = NeonGreen,
-  onPrimary = VoidBlack,
-  primaryContainer = NeonGreenDark,
-  onPrimaryContainer = Color.White,
+val RebornLightColorScheme = lightColorScheme(
+  primary = CleanPrimary,              // #10B981
+  onPrimary = Color.White,
+  primaryContainer = CleanPrimaryLight,// #ECFDF5
+  onPrimaryContainer = CleanPrimaryDark,// #059669
 
-  secondary = NeonGreenBright,
-  onSecondary = VoidBlack,
-  secondaryContainer = NeonGreenDark,
-  onSecondaryContainer = Color.White,
+  secondary = CleanBlue,
+  onSecondary = Color.White,
+  secondaryContainer = CleanBlueLight,
+  onSecondaryContainer = Color(0xFF1E40AF),
 
-  tertiary = NeonPurple,
+  tertiary = CleanPurple,
   onTertiary = Color.White,
-  tertiaryContainer = NeonPurpleDark,
-  onTertiaryContainer = Color.White,
+  tertiaryContainer = CleanPurpleLight,
+  onTertiaryContainer = Color(0xFF5B21B6),
 
-  background = CyberBackground,
-  onBackground = TextPrimary,
+  background = CleanBackground,        // #F8F9FA
+  onBackground = TextPrimary,          // #0F172A
 
-  surface = CyberSurface,
-  onSurface = TextPrimary,
-  surfaceVariant = CyberSurfaceVariant,
-  onSurfaceVariant = TextSecondary,
+  surface = CleanCard,                 // #FFFFFF
+  onSurface = TextPrimary,             // #0F172A
+  surfaceVariant = CleanCardVariant,   // #F1F5F9
+  onSurfaceVariant = TextSecondary,    // #64748B
 
-  outline = CyberCardBorder,
-  outlineVariant = Color(0xFF1E2638),
+  outline = CleanBorder,               // #E2E8F0
+  outlineVariant = CleanBorderHover,
 
-  error = NeonCrimson,
+  error = CleanCrimson,
   onError = Color.White
 )
 
@@ -41,9 +41,8 @@ fun MyApplicationTheme(
   content: @Composable () -> Unit,
 ) {
   MaterialTheme(
-    colorScheme = RebornDarkColorScheme,
+    colorScheme = RebornLightColorScheme,
     typography = Typography,
     content = content
   )
 }
-

@@ -80,15 +80,13 @@ fun AuthScreen(
       // Emblem / Logo
       Box(
         modifier = Modifier
-          .size(80.dp)
+          .size(76.dp)
           .clip(CircleShape)
-          .background(
-            Brush.radialGradient(listOf(NeonGreen.copy(alpha = 0.3f), Color.Transparent))
-          )
-          .border(2.dp, NeonGreen, CircleShape),
+          .background(Color(0xFFECFDF5))
+          .border(2.dp, CleanPrimary, CircleShape),
         contentAlignment = Alignment.Center
       ) {
-        Text(text = "⚡", fontSize = 36.sp)
+        Text(text = "🌱", fontSize = 36.sp)
       }
 
       Spacer(modifier = Modifier.height(14.dp))
@@ -96,16 +94,16 @@ fun AuthScreen(
       Text(
         text = "REBORN",
         fontSize = 28.sp,
-        fontWeight = FontWeight.Black,
+        fontWeight = FontWeight.Bold,
         color = TextPrimary,
-        letterSpacing = 2.sp
+        letterSpacing = 1.sp
       )
       Text(
         text = "REBUILD YOURSELF. LEVEL UP YOUR LIFE.",
         fontSize = 11.sp,
-        fontWeight = FontWeight.Bold,
-        color = NeonGreen,
-        letterSpacing = 1.sp
+        fontWeight = FontWeight.SemiBold,
+        color = CleanPrimary,
+        letterSpacing = 0.5.sp
       )
 
       Spacer(modifier = Modifier.height(24.dp))
@@ -114,8 +112,8 @@ fun AuthScreen(
       AnimatedVisibility(visible = errorMessage != null) {
         Surface(
           shape = RoundedCornerShape(10.dp),
-          color = NeonCrimson.copy(alpha = 0.2f),
-          border = androidx.compose.foundation.BorderStroke(1.dp, NeonCrimson),
+          color = Color(0xFFFEF2F2),
+          border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFECACA)),
           modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 12.dp)
@@ -124,9 +122,9 @@ fun AuthScreen(
             modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
           ) {
-            Icon(Icons.Default.ErrorOutline, contentDescription = null, tint = NeonCrimson, modifier = Modifier.size(18.dp))
+            Icon(Icons.Default.ErrorOutline, contentDescription = null, tint = Color(0xFFDC2626), modifier = Modifier.size(18.dp))
             Spacer(modifier = Modifier.width(8.dp))
-            Text(text = errorMessage ?: "", color = TextPrimary, fontSize = 12.sp)
+            Text(text = errorMessage ?: "", color = Color(0xFFDC2626), fontSize = 12.sp)
           }
         }
       }
@@ -134,8 +132,8 @@ fun AuthScreen(
       AnimatedVisibility(visible = infoMessage != null) {
         Surface(
           shape = RoundedCornerShape(10.dp),
-          color = NeonGreen.copy(alpha = 0.2f),
-          border = androidx.compose.foundation.BorderStroke(1.dp, NeonGreen),
+          color = Color(0xFFECFDF5),
+          border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFA7F3D0)),
           modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 12.dp)
@@ -144,22 +142,22 @@ fun AuthScreen(
             modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
           ) {
-            Icon(Icons.Default.CheckCircle, contentDescription = null, tint = NeonGreen, modifier = Modifier.size(18.dp))
+            Icon(Icons.Default.CheckCircle, contentDescription = null, tint = CleanPrimary, modifier = Modifier.size(18.dp))
             Spacer(modifier = Modifier.width(8.dp))
-            Text(text = infoMessage ?: "", color = TextPrimary, fontSize = 12.sp)
+            Text(text = infoMessage ?: "", color = CleanPrimary, fontSize = 12.sp)
           }
         }
       }
 
       CyberCard(
-        borderColor = NeonGreen.copy(alpha = 0.5f)
+        borderColor = CleanBorder
       ) {
         Text(
-          text = if (isRegisterMode) "HUNTER AWAKENING (REGISTER)" else "ENTER COMMAND (LOGIN)",
+          text = if (isRegisterMode) "CREATE YOUR ACCOUNT" else "WELCOME BACK",
           fontSize = 13.sp,
-          fontWeight = FontWeight.Black,
-          color = NeonGreen,
-          letterSpacing = 1.sp
+          fontWeight = FontWeight.Bold,
+          color = TextPrimary,
+          letterSpacing = 0.5.sp
         )
 
         Spacer(modifier = Modifier.height(14.dp))
@@ -168,8 +166,8 @@ fun AuthScreen(
           OutlinedTextField(
             value = hunterName,
             onValueChange = { hunterName = it },
-            label = { Text("Hunter Call-Sign (Name)") },
-            leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = NeonGreen) },
+            label = { Text("Your Name") },
+            leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = CleanPrimary) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp)
@@ -181,7 +179,7 @@ fun AuthScreen(
           value = email,
           onValueChange = { email = it },
           label = { Text("Email Address") },
-          leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = NeonGreen) },
+          leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = CleanPrimary) },
           singleLine = true,
           modifier = Modifier.fillMaxWidth(),
           shape = RoundedCornerShape(12.dp)
@@ -192,8 +190,8 @@ fun AuthScreen(
         OutlinedTextField(
           value = password,
           onValueChange = { password = it },
-          label = { Text("Master Key (Password)") },
-          leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = NeonGreen) },
+          label = { Text("Password") },
+          leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = CleanPrimary) },
           visualTransformation = PasswordVisualTransformation(),
           singleLine = true,
           modifier = Modifier.fillMaxWidth(),
@@ -205,8 +203,8 @@ fun AuthScreen(
           OutlinedTextField(
             value = confirmPassword,
             onValueChange = { confirmPassword = it },
-            label = { Text("Confirm Master Key") },
-            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = NeonGreen) },
+            label = { Text("Confirm Password") },
+            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = CleanPrimary) },
             visualTransformation = PasswordVisualTransformation(),
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
@@ -218,9 +216,9 @@ fun AuthScreen(
           Spacer(modifier = Modifier.height(4.dp))
           Text(
             text = "Forgot password?",
-            fontSize = 11.sp,
-            color = NeonPurple,
-            fontWeight = FontWeight.Bold,
+            fontSize = 12.sp,
+            color = CleanPrimary,
+            fontWeight = FontWeight.Medium,
             modifier = Modifier
               .align(Alignment.End)
               .clickable { showResetDialog = true }
@@ -264,17 +262,17 @@ fun AuthScreen(
             }
           },
           enabled = !isLoading,
-          colors = ButtonDefaults.buttonColors(containerColor = NeonGreen, contentColor = VoidBlack),
+          colors = ButtonDefaults.buttonColors(containerColor = CleanPrimary, contentColor = Color.White),
           modifier = Modifier.fillMaxWidth(),
           shape = RoundedCornerShape(12.dp)
         ) {
           if (isLoading) {
-            CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp, color = VoidBlack)
+            CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp, color = Color.White)
           } else {
             Text(
-              text = if (isRegisterMode) "AWAKEN ACCOUNT (+100 XP)" else "AUTHENTICATE & ENTER",
-              fontWeight = FontWeight.Black,
-              fontSize = 13.sp
+              text = if (isRegisterMode) "Create Account" else "Sign In",
+              fontWeight = FontWeight.Bold,
+              fontSize = 14.sp
             )
           }
         }
@@ -286,9 +284,9 @@ fun AuthScreen(
           modifier = Modifier.fillMaxWidth(),
           verticalAlignment = Alignment.CenterVertically
         ) {
-          HorizontalDivider(modifier = Modifier.weight(1f), color = CyberCardBorder)
-          Text(text = " OR ", fontSize = 11.sp, color = TextTertiary, fontWeight = FontWeight.Bold)
-          HorizontalDivider(modifier = Modifier.weight(1f), color = CyberCardBorder)
+          HorizontalDivider(modifier = Modifier.weight(1f), color = CleanBorder)
+          Text(text = " OR ", fontSize = 11.sp, color = TextSecondary, fontWeight = FontWeight.SemiBold)
+          HorizontalDivider(modifier = Modifier.weight(1f), color = CleanBorder)
         }
 
         Spacer(modifier = Modifier.height(14.dp))
@@ -317,15 +315,15 @@ fun AuthScreen(
             )
           },
           enabled = !isLoading,
-          colors = ButtonDefaults.buttonColors(containerColor = CyberSurfaceVariant, contentColor = TextPrimary),
-          border = androidx.compose.foundation.BorderStroke(1.dp, NeonCyan),
+          colors = ButtonDefaults.buttonColors(containerColor = CleanCardVariant, contentColor = TextPrimary),
+          border = androidx.compose.foundation.BorderStroke(1.dp, CleanBorder),
           modifier = Modifier.fillMaxWidth(),
           shape = RoundedCornerShape(12.dp)
         ) {
           Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(text = "G", fontWeight = FontWeight.Black, fontSize = 16.sp, color = NeonCyan)
+            Text(text = "G", fontWeight = FontWeight.Black, fontSize = 16.sp, color = CleanPrimary)
             Spacer(modifier = Modifier.width(10.dp))
-            Text("Sign in with Google", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+            Text("Sign in with Google", fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
           }
         }
 
@@ -340,10 +338,10 @@ fun AuthScreen(
           modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
           Text(
-            text = if (isRegisterMode) "Already awakened? Return to Login" else "New candidate? Create Reborn Account",
+            text = if (isRegisterMode) "Already have an account? Sign In" else "New here? Create an Account",
             fontSize = 12.sp,
-            color = NeonCyan,
-            fontWeight = FontWeight.Bold
+            color = CleanPrimary,
+            fontWeight = FontWeight.SemiBold
           )
         }
       }
@@ -355,7 +353,7 @@ fun AuthScreen(
     var resetEmail by remember { mutableStateOf(email) }
     AlertDialog(
       onDismissRequest = { showResetDialog = false },
-      title = { Text("Reset Master Key", color = TextPrimary, fontWeight = FontWeight.Bold) },
+      title = { Text("Reset Password", color = TextPrimary, fontWeight = FontWeight.Bold) },
       text = {
         Column {
           Text("Enter your email address to receive password reset instructions.", color = TextSecondary, fontSize = 12.sp)
@@ -377,7 +375,7 @@ fun AuthScreen(
               showResetDialog = false
             }
           },
-          colors = ButtonDefaults.buttonColors(containerColor = NeonCyan, contentColor = VoidBlack)
+          colors = ButtonDefaults.buttonColors(containerColor = CleanPrimary, contentColor = Color.White)
         ) {
           Text("Send Reset Link")
         }
@@ -387,7 +385,7 @@ fun AuthScreen(
           Text("Cancel", color = TextSecondary)
         }
       },
-      containerColor = CyberSurface
+      containerColor = CleanCard
     )
   }
 }

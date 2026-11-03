@@ -181,8 +181,8 @@ fun ScheduleDayCard(
       Button(
         onClick = onStartWorkout,
         colors = ButtonDefaults.buttonColors(
-          containerColor = if (isRecovery) NeonPurple else NeonGreen,
-          contentColor = VoidBlack
+          containerColor = if (isRecovery) CleanPurple else CleanPrimary,
+          contentColor = Color.White
         ),
         shape = RoundedCornerShape(10.dp),
         contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp)
@@ -208,7 +208,7 @@ fun ActiveWorkoutSessionCard(
 ) {
   CyberCard(
     modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-    borderColor = NeonGreen
+    borderColor = CleanPrimary
   ) {
     Row(
       modifier = Modifier.fillMaxWidth(),
@@ -217,31 +217,31 @@ fun ActiveWorkoutSessionCard(
     ) {
       Column {
         Text(
-          text = "ACTIVE TRAINING PROTOCOL",
+          text = "ACTIVE WORKOUT SESSION",
           fontSize = 11.sp,
           fontWeight = FontWeight.Bold,
-          color = NeonGreen,
-          letterSpacing = 1.sp
+          color = CleanPrimaryDark,
+          letterSpacing = 0.8.sp
         )
         Text(
           text = session.workoutTitle,
           fontSize = 18.sp,
-          fontWeight = FontWeight.Black,
+          fontWeight = FontWeight.Bold,
           color = TextPrimary
         )
       }
 
       TextButton(onClick = onCancel) {
-        Text("Cancel", color = NeonCrimson, fontSize = 12.sp)
+        Text("Cancel", color = CleanCrimson, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
       }
     }
 
-    // Animated Rest Timer HUD Bar if rest is active
+    // Rest Timer Banner if rest is active
     AnimatedVisibility(visible = restSeconds > 0) {
       Surface(
         shape = RoundedCornerShape(12.dp),
-        color = Color(0xFF132228),
-        border = androidx.compose.foundation.BorderStroke(1.dp, NeonCyan),
+        color = CleanBlueLight,
+        border = androidx.compose.foundation.BorderStroke(1.dp, CleanBlue.copy(alpha = 0.3f)),
         modifier = Modifier
           .fillMaxWidth()
           .padding(vertical = 10.dp)
@@ -258,26 +258,25 @@ fun ActiveWorkoutSessionCard(
               modifier = Modifier
                 .size(36.dp)
                 .clip(CircleShape)
-                .background(NeonCyan.copy(alpha = 0.2f))
-                .border(1.5.dp, NeonCyan, CircleShape),
+                .background(CleanBlue),
               contentAlignment = Alignment.Center
             ) {
               Text(
                 text = "${restSeconds}s",
-                fontWeight = FontWeight.Black,
-                fontSize = 12.sp,
-                color = NeonCyan
+                fontWeight = FontWeight.Bold,
+                fontSize = 13.sp,
+                color = Color.White
               )
             }
             Spacer(modifier = Modifier.width(10.dp))
             Column {
-              Text(text = "REST INTERVAL", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = NeonCyan)
+              Text(text = "REST INTERVAL", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = CleanBlue)
               Text(text = "Catch breath & hydrate", fontSize = 11.sp, color = TextSecondary)
             }
           }
 
           TextButton(onClick = onSkipRest) {
-            Text("Skip Rest", color = NeonCyan, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+            Text("Skip Rest", color = CleanBlue, fontWeight = FontWeight.Bold, fontSize = 12.sp)
           }
         }
       }
@@ -289,7 +288,8 @@ fun ActiveWorkoutSessionCard(
     session.exercises.forEachIndexed { exIdx, activeEx ->
       Surface(
         shape = RoundedCornerShape(12.dp),
-        color = CyberSurfaceVariant,
+        color = CleanCardVariant,
+        border = androidx.compose.foundation.BorderStroke(1.dp, CleanBorder),
         modifier = Modifier
           .fillMaxWidth()
           .padding(vertical = 6.dp)
@@ -304,7 +304,7 @@ fun ActiveWorkoutSessionCard(
           Text(
             text = "Target: ${activeEx.exercise.targetMuscles} • ${activeEx.exercise.defaultSetsReps}",
             fontSize = 11.sp,
-            color = TextTertiary
+            color = TextSecondary
           )
 
           Spacer(modifier = Modifier.height(8.dp))
@@ -320,28 +320,28 @@ fun ActiveWorkoutSessionCard(
               Text(
                 text = "Set ${set.setNumber} (${set.targetReps})",
                 fontSize = 13.sp,
-                color = if (set.isDone) NeonGreen else TextSecondary,
+                color = if (set.isDone) CleanPrimaryDark else TextSecondary,
                 fontWeight = if (set.isDone) FontWeight.Bold else FontWeight.Normal
               )
 
               if (set.isDone) {
                 Surface(
                   shape = RoundedCornerShape(6.dp),
-                  color = NeonGreen.copy(alpha = 0.15f)
+                  color = CleanPrimaryLight
                 ) {
                   Row(
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically
                   ) {
-                    Icon(Icons.Default.Check, contentDescription = null, tint = NeonGreen, modifier = Modifier.size(14.dp))
+                    Icon(Icons.Default.Check, contentDescription = null, tint = CleanPrimaryDark, modifier = Modifier.size(14.dp))
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Completed", fontSize = 11.sp, color = NeonGreen, fontWeight = FontWeight.Bold)
+                    Text("Completed", fontSize = 11.sp, color = CleanPrimaryDark, fontWeight = FontWeight.Bold)
                   }
                 }
               } else {
                 Button(
                   onClick = { onCompleteSet(exIdx, setIdx, 12, 0f) },
-                  colors = ButtonDefaults.buttonColors(containerColor = NeonCyan, contentColor = VoidBlack),
+                  colors = ButtonDefaults.buttonColors(containerColor = CleanPrimary, contentColor = Color.White),
                   shape = RoundedCornerShape(8.dp),
                   contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
                 ) {
@@ -358,13 +358,13 @@ fun ActiveWorkoutSessionCard(
 
     Button(
       onClick = onFinish,
-      colors = ButtonDefaults.buttonColors(containerColor = NeonGreen, contentColor = VoidBlack),
+      colors = ButtonDefaults.buttonColors(containerColor = CleanPrimary, contentColor = Color.White),
       modifier = Modifier.fillMaxWidth(),
       shape = RoundedCornerShape(12.dp)
     ) {
       Text(
-        text = "FINISH WORKOUT (+100 XP)",
-        fontWeight = FontWeight.Black,
+        text = "COMPLETE WORKOUT (+100 pts)",
+        fontWeight = FontWeight.Bold,
         fontSize = 14.sp
       )
     }

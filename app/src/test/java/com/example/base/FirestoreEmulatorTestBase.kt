@@ -15,6 +15,7 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import org.junit.After
+import org.junit.Assume
 import org.junit.Before
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -32,6 +33,16 @@ abstract class FirestoreEmulatorTestBase {
 
   @Before
   open fun setUpFirebase() {
+    val isEmulatorRunning = try {
+      java.net.Socket().use { socket ->
+        socket.connect(java.net.InetSocketAddress(EMULATOR_HOST, AUTH_PORT), 300)
+        true
+      }
+    } catch (_: Exception) {
+      false
+    }
+    Assume.assumeTrue("Firebase Auth emulator is not running on $EMULATOR_HOST:$AUTH_PORT", isEmulatorRunning)
+
     val context = ApplicationProvider.getApplicationContext<Context>()
     val resId = context.resources.getIdentifier("firestore_database_id", "string", context.packageName)
     databaseId = if (resId != 0) context.getString(resId) else "demo-database"
@@ -64,7 +75,9 @@ abstract class FirestoreEmulatorTestBase {
 
   @After
   open fun tearDownFirebase() {
-    auth.signOut()
+    if (::auth.isInitialized) {
+      auth.signOut()
+    }
   }
 
   protected suspend fun signInTestUser(email: String): String = withContext(Dispatchers.IO) {

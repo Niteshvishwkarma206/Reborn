@@ -11,15 +11,20 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 enum class AppScreen(val title: String, val iconName: String) {
-  HOME("Command", "dashboard"),
-  CHALLENGE("30-Day", "flag"),
+  HOME("Home", "home"),
+  PLAN("Plan", "event_note"),
+  ACTIVITY("Activity", "directions_walk"),
+  PROGRESS("Progress", "insights"),
+  PROFILE("Profile", "person"),
+
+  // Backward-compatible screen entries
+  CHALLENGE("Plan", "event_note"),
   EXERCISES("Exercises", "fitness_center"),
   WORKOUT("Workout", "timer"),
-  WALKING("Stride", "directions_walk"),
-  NUTRITION("Fuel", "restaurant"),
+  WALKING("Activity", "directions_walk"),
+  NUTRITION("Nutrition", "restaurant"),
   MIND("Mind", "psychology"),
-  PERSONALITY("Persona", "military_tech"),
-  PROGRESS("Analytics", "bar_chart"),
+  PERSONALITY("Habits", "check_circle"),
   SETTINGS("Profile", "person")
 }
 
@@ -37,6 +42,10 @@ class RebornViewModel(application: Application) : AndroidViewModel(application) 
   val userProfile = repository.userProfile
   val missions = repository.missions
   val exercises = repository.exercises
+  val dailyWorkoutProgress = repository.dailyWorkoutProgress
+  val stepTrackerState = repository.stepTrackerState
+  val dailyHabits = repository.dailyHabits
+  val dayWorkouts = repository.dayWorkouts
   val walkingActivities = repository.walkingActivities
   val todayNutrition = repository.todayNutrition
   val todayMindLog = repository.todayMindLog
@@ -45,10 +54,12 @@ class RebornViewModel(application: Application) : AndroidViewModel(application) 
   val workoutHistory = repository.workoutHistory
   val weeklySchedule = repository.weeklySchedule
 
+  val healthConnectManager = repository.healthConnectManager
+
   private val _currentScreen = MutableStateFlow(AppScreen.HOME)
   val currentScreen: StateFlow<AppScreen> = _currentScreen.asStateFlow()
 
-  private val _selectedChallengeDay = MutableStateFlow(3)
+  private val _selectedChallengeDay = MutableStateFlow(1)
   val selectedChallengeDay: StateFlow<Int> = _selectedChallengeDay.asStateFlow()
 
   // Active Workout & Rest Timer State
@@ -59,7 +70,7 @@ class RebornViewModel(application: Application) : AndroidViewModel(application) 
   val restSecondsRemaining: StateFlow<Int> = _restSecondsRemaining.asStateFlow()
   private var timerJob: Job? = null
 
-  // Floating notification / XP celebration banner
+  // Floating notification banner
   private val _xpToast = MutableStateFlow<String?>(null)
   val xpToast: StateFlow<String?> = _xpToast.asStateFlow()
 
@@ -80,18 +91,21 @@ class RebornViewModel(application: Application) : AndroidViewModel(application) 
     if (currentUser != null) {
       repository.attachUserSync(currentUser.uid)
     }
+    // Initial health connect availability check
+    repository.refreshStepTracker()
   }
 
   fun signOut() {
     auth.signOut()
     repository.detachUserSync()
-    showXpToast("Signed Out of Reborn Network")
+    showToast("Signed Out")
   }
 
   override fun onCleared() {
     super.onCleared()
     auth.removeAuthStateListener(authStateListener)
     repository.detachUserSync()
+    timerJob?.cancel()
   }
 
   fun navigateTo(screen: AppScreen) {
@@ -102,39 +116,73 @@ class RebornViewModel(application: Application) : AndroidViewModel(application) 
     _selectedChallengeDay.value = day
   }
 
-  fun toggleMission(mission: DailyMission) {
-    if (mission.isCompleted) {
-      repository.uncompleteMission(mission.id)
+  fun getWorkoutForDay(day: Int): DayWorkout = repository.getWorkoutForDay(day)
+
+  fun getWorkoutProgressForDay(day: Int): DailyWorkoutProgress = repository.getWorkoutProgressForDay(day)
+
+  fun toggleExerciseInWorkout(day: Int, exerciseId: String) {
+    val result = repository.toggleExerciseInWorkout(day, exerciseId)
+    if (result.isCompleted) {
+      showToast("Day $day Workout Completed! (100%)")
     } else {
-      val success = repository.completeMission(mission.id)
-      if (success) {
-        showXpToast("+${mission.xpReward} XP: ${mission.title}")
-      }
+      showToast("Day $day Progress: ${result.percentage}%")
     }
   }
 
+  fun toggleMission(mission: DailyMission) {
+    repository.toggleMission(mission)
+  }
+
+  fun skipRestTimer() = stopRestTimer()
+  fun finishWorkout() = finishActiveWorkout()
+  fun cancelWorkout() = cancelActiveWorkout()
+
+  // --- Step Tracker Methods ---
+
+  fun refreshStepTracker() {
+    repository.refreshStepTracker()
+  }
+
+  fun recordManualSteps(steps: Int, date: String = "Today") {
+    repository.recordManualSteps(steps, date)
+    showToast("Recorded $steps steps")
+  }
+
+  fun updateStepGoal(newGoal: Int) {
+    repository.updateDailyStepGoal(newGoal)
+    showToast("Step goal updated to $newGoal")
+  }
+
+  // --- Habits Methods ---
+
+  fun toggleHabit(habitId: String) {
+    repository.toggleHabit(habitId)
+  }
+
+  // --- Water & Nutrition ---
+
   fun addWater(ml: Int) {
     repository.addWater(ml)
-    showXpToast("+$ml ml Hydrated! (+10 XP)")
+    showToast(if (ml > 0) "+$ml ml Water logged" else "$ml ml Water updated")
   }
 
   fun logMeal(mealType: String, item: MealItem) {
-    repository.addMealItem(mealType, item)
-    showXpToast("Logged ${item.name} (+15 XP)")
+    repository.logMeal(mealType, item)
+    showToast("Logged ${item.name}")
   }
 
   fun removeMeal(mealType: String, index: Int) {
-    repository.removeMealItem(mealType, index)
+    repository.removeMeal(mealType, index)
   }
 
   fun recordWalking(activity: WalkingActivity) {
     repository.logWalkingActivity(activity)
-    showXpToast("Stride Recorded: ${activity.distanceKm} km!")
+    showToast("Session Recorded: ${activity.distanceKm} km")
   }
 
   fun saveMindLog(log: MindLog) {
     repository.saveMindLog(log)
-    showXpToast("Mind Fortress Saved (+30 XP)")
+    showToast("Mind Log Saved")
   }
 
   fun togglePersonalityTask(taskId: String) {
@@ -143,16 +191,37 @@ class RebornViewModel(application: Application) : AndroidViewModel(application) 
 
   fun updateTargets(waterTarget: Int, stepTarget: Int, kmTarget: Float) {
     repository.updateTargets(waterTarget, stepTarget, kmTarget)
-    showXpToast("Targets Updated!")
+    showToast("Goals Updated")
   }
 
   fun resetChallenge() {
     repository.resetChallenge()
     _selectedChallengeDay.value = 1
-    showXpToast("System Reset to Day 1")
+    showToast("Reset to Day 1")
   }
 
-  // Workout Session Execution
+  // --- Workout Session & Rest Timer ---
+
+  fun startWorkoutForDay(day: Int) {
+    val workout = getWorkoutForDay(day)
+    val sessionExercises = workout.exercises.map { ex ->
+      ActiveWorkoutExercise(
+        exercise = ex,
+        sets = listOf(
+          WorkoutSet(1, "12 reps"),
+          WorkoutSet(2, "12 reps"),
+          WorkoutSet(3, "10 reps")
+        )
+      )
+    }
+    _activeWorkout.value = ActiveWorkoutSession(
+      workoutTitle = workout.title,
+      exercises = sessionExercises
+    )
+    _selectedChallengeDay.value = day
+    _currentScreen.value = AppScreen.WORKOUT
+  }
+
   fun startWorkout(daySchedule: DayWorkoutSchedule) {
     val allEx = exercises.value
     val sessionExercises = daySchedule.exerciseNames.map { name ->
@@ -179,15 +248,24 @@ class RebornViewModel(application: Application) : AndroidViewModel(application) 
     val updatedExList = current.exercises.toMutableList()
     val ex = updatedExList[exerciseIndex]
     val updatedSets = ex.sets.toMutableList()
-    updatedSets[setIndex] = updatedSets[setIndex].copy(
+    val targetSet = updatedSets[setIndex]
+
+    updatedSets[setIndex] = targetSet.copy(
       completedReps = completedReps,
       weightKg = weightKg,
       isDone = true
     )
     updatedExList[exerciseIndex] = ex.copy(sets = updatedSets)
-    _activeWorkout.value = current.copy(exercises = updatedExList)
 
-    startRestTimer(ex.exercise.restSeconds)
+    val allDone = updatedExList.all { e -> e.sets.all { s -> s.isDone } }
+    _activeWorkout.value = current.copy(
+      exercises = updatedExList,
+      isCompleted = allDone
+    )
+
+    if (!allDone) {
+      startRestTimer(ex.exercise.restSeconds)
+    }
   }
 
   fun startRestTimer(seconds: Int) {
@@ -195,37 +273,42 @@ class RebornViewModel(application: Application) : AndroidViewModel(application) 
     _restSecondsRemaining.value = seconds
     timerJob = viewModelScope.launch {
       while (_restSecondsRemaining.value > 0) {
-        delay(1000L)
-        _restSecondsRemaining.value -= 1
+        delay(1000)
+        _restSecondsRemaining.value = _restSecondsRemaining.value - 1
       }
     }
   }
 
-  fun skipRestTimer() {
+  fun stopRestTimer() {
     timerJob?.cancel()
     _restSecondsRemaining.value = 0
   }
 
-  fun finishWorkout() {
+  fun finishActiveWorkout() {
     val current = _activeWorkout.value ?: return
-    val summary = "Completed ${current.workoutTitle} • ${current.exercises.size} Exercises"
-    repository.completeWorkout(summary)
+    repository.completeWorkout("Completed ${current.workoutTitle}")
+    // Mark today's assigned workout completed as well
+    val day = _selectedChallengeDay.value
+    val workout = getWorkoutForDay(day)
+    workout.exercises.forEach { ex ->
+      val prog = getWorkoutProgressForDay(day)
+      if (!prog.completedExerciseIds.contains(ex.id)) {
+        repository.toggleExerciseInWorkout(day, ex.id)
+      }
+    }
     _activeWorkout.value = null
-    timerJob?.cancel()
-    _restSecondsRemaining.value = 0
-    showXpToast("Workout Conquered! +100 XP ⚔️")
+    showToast("Workout Completed!")
   }
 
-  fun cancelWorkout() {
+  fun cancelActiveWorkout() {
     _activeWorkout.value = null
-    timerJob?.cancel()
-    _restSecondsRemaining.value = 0
+    stopRestTimer()
   }
 
-  private fun showXpToast(msg: String) {
+  private fun showToast(msg: String) {
     _xpToast.value = msg
     viewModelScope.launch {
-      delay(3000L)
+      delay(2600)
       if (_xpToast.value == msg) {
         _xpToast.value = null
       }
